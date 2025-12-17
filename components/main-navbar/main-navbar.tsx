@@ -1,0 +1,30 @@
+"use client"
+
+import Image from "next/image";
+import { SideNavigationSheet } from "./side-navigation-sheet";
+import { TopNavigationBar } from "./top-navigation-bar";
+import { cn } from "@/lib/utils";
+import { ThemeToggleButton } from "./theme-toggle-button";
+
+
+
+export function MainNavbar() {
+    return (
+        <nav className={cn("h-(--navbar-height) relative z-50 w-screen bg-background flex justify-between items-center pt-4 pb-4 pl-4 pr-4 md:pl-16 md:pr-16 lg:pl-4 lg:pr-4 xl:pl-16 xl:pr-16")}>
+            <div className="flex items-center">
+                <div className="w-[2.5em] md:w-[4em] aspect-square">
+                    <img src="/unmul-small.png" alt="Mulawarman University Icon" />
+                </div>
+                <div className="ml-2 lg:ml-4">
+                    <h3 className="text-xs lg:text-lg font-bold">Pendidikan Komputer</h3>
+                    <p className="text-[0.6em] lg:text-sm">Fakultas Keguruan dan Ilmu Pendidikan</p>
+                </div>
+            </div>
+            <div className="flex items-center xl:gap-2">
+                <TopNavigationBar className="hidden lg:block" />
+                <ThemeToggleButton />
+                <SideNavigationSheet className="lg:hidden" />
+            </div>
+        </nav>
+    )
+}
