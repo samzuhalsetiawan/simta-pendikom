@@ -15,27 +15,50 @@ import { navigationData, type NavigationData } from "./navbar-data";
 import { useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowDown01Icon } from "@hugeicons/core-free-icons";
+import { useNavbarScroll } from "@/components/navbar-scroll-context";
+import { signOut } from "next-auth/react";
+
+import { UserNav } from "./user-nav";
 
 export function TopNavigationBar(
-   { className, ...props }: React.ComponentProps<typeof NavigationMenu>
+   { className, user, ...props }: React.ComponentProps<typeof NavigationMenu> & { user?: any | null }
 ) {
    const isMobile = useIsMobile();
+   const { isScrolled } = useNavbarScroll();
+
+   // Filter out Login link if user is authenticated
+   const filteredNavData = navigationData.filter(item => {
+      if (item.type === "action" && item.href === "/login" && user) {
+         return false;
+      }
+      return true;
+   });
+
    return (
-      <NavigationMenu className={className} viewport={isMobile} {...props}>
-         <NavigationMenuList className="flex-wrap">
-            {navigationData.map((item, index) => (
-               <TopLevelItem key={index} item={item} />
-            ))}
-         </NavigationMenuList>
-      </NavigationMenu>
+      <div className={cn("flex items-center gap-4", className)}>
+         <NavigationMenu viewport={isMobile} {...props}>
+            <NavigationMenuList className="flex-wrap">
+               {filteredNavData.map((item, index) => (
+                  <TopLevelItem key={index} item={item} />
+               ))}
+               {user && <UserNav className="mr-3" user={user} isScrolled={isScrolled} />}
+            </NavigationMenuList>
+         </NavigationMenu>
+      </div>
    )
 }
 
 function TopLevelItem({ item }: { item: NavigationData }) {
+   const { isScrolled } = useNavbarScroll();
+   const triggerClass = cn(
+      "bg-transparent transition-colors duration-300",
+      !isScrolled ? "dark:text-background dark:hover:text-foreground" : "text-foreground"
+   );
+
    if (item.type === "action") {
       return (
          <NavigationMenuItem>
-            <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+            <NavigationMenuLink asChild className={navigationMenuTriggerStyle({ className: triggerClass })}>
                <Link href={item.href}>
                   {item.title}
                </Link>
@@ -46,7 +69,7 @@ function TopLevelItem({ item }: { item: NavigationData }) {
 
    return (
       <NavigationMenuItem>
-         <NavigationMenuTrigger>{item.title}</NavigationMenuTrigger>
+         <NavigationMenuTrigger className={triggerClass}>{item.title}</NavigationMenuTrigger>
          <NavigationMenuContent className="right-0 left-auto">
             <ul className="flex flex-col items-end gap-2 p-4 min-w-[250px] max-h-[70vh] overflow-y-auto">
                {item.data.map((subItem, index) => (

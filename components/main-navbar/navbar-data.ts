@@ -325,5 +325,11 @@ export const navigationData: NavigationData[] = [
             description: "Dokumen Penelitian Pendidikan Komputer"
          }
       ]
+   },
+   {
+      type: "action",
+      title: "Login",
+      href: "/login",
+      description: "Halaman Login"
    }
 ]

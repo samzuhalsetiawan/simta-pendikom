@@ -17,10 +17,19 @@ import { navigationData, type NavigationData } from "./navbar-data"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import { signOut } from "next-auth/react"
 
 export function SideNavigationSheet(
-   { className, ...props }: React.ComponentProps<typeof SheetTrigger>
+   { className, user, ...props }: React.ComponentProps<typeof SheetTrigger> & { user?: any | null }
 ) {
+   // Filter out Login link if user is authenticated
+   const filteredNavData = navigationData.filter(item => {
+      if (item.type === "action" && item.href === "/login" && user) {
+         return false;
+      }
+      return true;
+   });
+
    return (
       <Sheet>
          <SheetTrigger asChild className={className} {...props}>
@@ -36,9 +45,18 @@ export function SideNavigationSheet(
                </SheetDescription>
             </SheetHeader>
             <div className="flex flex-col gap-2 mt-4">
-               {navigationData.map((item, index) => (
+               {filteredNavData.map((item, index) => (
                   <SideNavItem key={index} item={item} />
                ))}
+               {user && (
+                  <Button
+                     variant="outline"
+                     className="w-full mt-4 justify-start font-medium"
+                     onClick={() => signOut()}
+                  >
+                     Logout
+                  </Button>
+               )}
             </div>
             <SheetFooter className="mt-4">
                <SheetClose asChild>
