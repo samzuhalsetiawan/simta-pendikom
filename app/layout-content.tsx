@@ -3,6 +3,8 @@
 import { usePathname } from "next/navigation"
 import { MainNavbar } from "@/components/main-navbar/main-navbar"
 import { Session } from "next-auth"
+import { cn } from "@/lib/utils"
+import { Toaster } from "sonner";
 
 export function LayoutContent({
    children,
@@ -12,12 +14,16 @@ export function LayoutContent({
    session: Session | null;
 }) {
    const pathname = usePathname()
+   const isHomePage = pathname === "/"
    const hideNavbar = pathname === "/login"
 
    return (
       <>
-         {!hideNavbar && <MainNavbar className="lg:fixed lg:top-0 z-50" user={session?.user} />}
-         {children}
+         {!hideNavbar && <MainNavbar user={session?.user} />}
+         <div className={cn(!hideNavbar && !isHomePage && "pt-(--navbar-height)")}>
+            {children}
+            <Toaster richColors position="top-right" />
+         </div>
       </>
    )
 }

@@ -6,6 +6,7 @@ import { TopNavigationBar } from "./top-navigation-bar";
 import { cn } from "@/lib/utils";
 import { ThemeToggleButton } from "./theme-toggle-button";
 import { useNavbarScroll } from "@/components/navbar-scroll-context";
+import { usePathname } from "next/navigation";
 
 interface MainNavbarProps extends React.HTMLAttributes<HTMLElement> {
     user?: any | null;
@@ -14,11 +15,13 @@ interface MainNavbarProps extends React.HTMLAttributes<HTMLElement> {
 export function MainNavbar(
     { className, user, ...props }: MainNavbarProps
 ) {
-    const { isScrolled } = useNavbarScroll();
+    const { isScrolled, isVisible } = useNavbarScroll();
+    const pathName = usePathname();
 
     return (
         <nav className={cn(
-            "h-(--navbar-height) w-screen bg-background flex justify-between items-center pt-4 pb-4 pl-4 pr-4 md:pl-16 md:pr-16 lg:pl-4 lg:pr-4 xl:pl-16 xl:pr-16 transition-colors duration-300",
+            "fixed top-0 left-0 z-50 h-(--navbar-height) w-screen flex justify-between items-center px-4 md:px-16 lg:px-4 xl:px-16 transition-transform duration-300 ease-in-out",
+            isVisible ? "translate-y-0" : "-translate-y-full",
             !isScrolled ? "lg:bg-transparent" : "lg:bg-background lg:border-b",
             className
         )} {...props}>
@@ -27,8 +30,8 @@ export function MainNavbar(
                     <img src="/unmul-small.png" alt="Mulawarman University Icon" />
                 </div>
                 <div className="ml-2 lg:ml-4">
-                    <h3 className={cn("text-xs lg:text-lg font-bold transition-colors duration-300", !isScrolled && "lg:dark:text-background")}>Pendidikan Komputer</h3>
-                    <p className={cn("text-[0.6em] lg:text-sm transition-colors duration-300", !isScrolled && "lg:dark:text-background")}>Fakultas Keguruan dan Ilmu Pendidikan</p>
+                    <h3 className={cn("text-xs lg:text-lg font-bold transition-colors duration-300", !isScrolled && pathName == "/" && "lg:dark:text-background")}>Pendidikan Komputer</h3>
+                    <p className={cn("text-[0.6em] lg:text-sm transition-colors duration-300", !isScrolled && pathName == "/" && "lg:dark:text-background")}>Fakultas Keguruan dan Ilmu Pendidikan</p>
                 </div>
             </div>
             <div className="flex items-center xl:gap-2">

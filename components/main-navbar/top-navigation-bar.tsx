@@ -19,6 +19,7 @@ import { useNavbarScroll } from "@/components/navbar-scroll-context";
 import { signOut } from "next-auth/react";
 
 import { UserNav } from "./user-nav";
+import { usePathname } from "next/navigation";
 
 export function TopNavigationBar(
    { className, user, ...props }: React.ComponentProps<typeof NavigationMenu> & { user?: any | null }
@@ -50,9 +51,11 @@ export function TopNavigationBar(
 
 function TopLevelItem({ item }: { item: NavigationData }) {
    const { isScrolled } = useNavbarScroll();
+   const pathName = usePathname();
    const triggerClass = cn(
       "bg-transparent transition-colors duration-300",
-      !isScrolled ? "dark:text-background dark:hover:text-foreground" : "text-foreground"
+      !isScrolled ? "dark:text-background dark:hover:text-foreground" : "text-foreground",
+      pathName !== '/' && "dark:text-foreground dark:hover:text-background",
    );
 
    if (item.type === "action") {
