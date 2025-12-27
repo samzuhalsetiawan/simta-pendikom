@@ -1,10 +1,12 @@
+"use server"
+
 import { MainCarousel } from "@/components/main-carousel/main-carousel";
 import { Button } from "@/components/ui/button";
-import styles from "./home.module.css"
+import styles from "../home.module.css"
 import { cn } from "@/lib/utils";
 import { ScrollAwareSection } from "@/components/scroll-aware-section";
 
-export default function Page() {
+export default async function Page() {
     return (
         <main className="">
             <ScrollAwareSection className={cn("relative w-screen aspect-square md:aspect-video")}>

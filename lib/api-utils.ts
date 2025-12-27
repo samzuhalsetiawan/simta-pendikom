@@ -1,11 +1,5 @@
 import { NextResponse } from "next/server";
 
-export interface ApiResponse<T = any> {
-   success: boolean;
-   data?: T;
-   error?: string;
-}
-
 export function successResponse<T>(data: T, status = 200) {
    return NextResponse.json({ success: true, data }, { status });
 }
@@ -14,11 +8,10 @@ export function errorResponse(message: string, status = 500) {
    return NextResponse.json({ success: false, error: message }, { status });
 }
 
-export function handleDbError(error: any) {
+export function handleError(error: any) {
    console.error("Database Error:", error);
 
-   // Map MySQL error codes (SQLSTATE) to HTTP responses
-   // Based on init_fix.sql definitions
+   // 1. Tangani Error Berdasarkan SQL State (Custom Signal dari Database)
    if (error && error.sqlState) {
       switch (error.sqlState) {
          case "45001": // ERR_ROLE_CONFLICT
@@ -32,14 +25,28 @@ export function handleDbError(error: any) {
          case "45005": // ERR_PRIVATE_EVENT
             return errorResponse("Cannot register for private events (Ujian Akhir)", 403);
          default:
-            // Log the unhandled SQL State for debugging
             console.warn(`Unhandled SQL State: ${error.sqlState}`);
       }
    }
 
-   // Handle common standard MySQL errors potentially
+   // 2. Tangani Error MySQL Common Codes
    if (error.code === 'ER_DUP_ENTRY') {
       return errorResponse("Duplicate entry found", 409);
+   }
+   
+   if (error.code === 'ECONNREFUSED') {
+      return errorResponse("Database connection refused. Please check if MySQL is running.", 503);
+   }
+
+   // 3. Tangani Error Parsing JSON (Khusus untuk pendekatan JSON_ARRAYAGG/OBJECT)
+   // Ini sering terjadi jika kolom JSON di database berisi data yang tidak valid
+   if (error instanceof SyntaxError && error.message.includes('JSON')) {
+      return errorResponse("Data format error: Invalid JSON structure from database", 500);
+   }
+
+   // 4. Tangani Parameter ID yang tidak valid (Bukan angka saat query ke /api/thesis/[id])
+   if (error.code === 'ER_BAD_FIELD_ERROR' || error.code === 'ER_PARSE_ERROR') {
+      return errorResponse("Invalid request parameter or query syntax", 400);
    }
 
    return errorResponse("Internal Server Error", 500);
