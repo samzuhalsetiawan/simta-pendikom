@@ -75,7 +75,8 @@ export function EventCalendar() {
             date: format(selectedDate, "d"),
             fullDate: selectedDate,
             isToday: isSameDay(selectedDate, new Date()),
-            isSelected: true
+            isSelected: true,
+            isCurrentMonth: isSameMonth(selectedDate, currentDate)
          }];
       }
 
@@ -88,7 +89,8 @@ export function EventCalendar() {
                date: format(date, "d"),
                fullDate: date,
                isToday: isSameDay(date, new Date()),
-               isSelected: isSameDay(date, selectedDate)
+               isSelected: isSameDay(date, selectedDate),
+               isCurrentMonth: isSameMonth(date, currentDate)
             };
          });
       }
