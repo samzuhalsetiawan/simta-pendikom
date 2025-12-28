@@ -20,9 +20,10 @@ export function MainNavbar(
 
     return (
         <nav className={cn(
-            "fixed top-0 left-0 z-50 h-(--navbar-height) w-screen flex justify-between items-center px-4 md:px-16 lg:px-4 xl:px-16 transition-transform duration-300 ease-in-out",
+            "fixed top-0 left-0 z-50 h-(--navbar-height) w-screen flex justify-between items-center",
+            "px-4 md:px-16 lg:px-4 xl:px-16 transition-transform duration-300 ease-in-out backdrop-blur-md",
+            !isScrolled && pathName == "/" && "lg:backdrop-blur-none",
             isVisible ? "translate-y-0" : "-translate-y-full",
-            !isScrolled ? "lg:bg-transparent" : "lg:bg-background lg:border-b",
             className
         )} {...props}>
             <div className="flex items-center">
@@ -30,7 +31,10 @@ export function MainNavbar(
                     <img src="/unmul-small.png" alt="Mulawarman University Icon" />
                 </div>
                 <div className="ml-2 lg:ml-4">
-                    <h3 className={cn("text-xs lg:text-lg font-bold transition-colors duration-300", !isScrolled && pathName == "/" && "lg:dark:text-background")}>Pendidikan Komputer</h3>
+                    <h3 className={cn(
+                        "text-xs lg:text-lg font-bold transition-colors duration-300",
+                        !isScrolled && pathName == "/" && "lg:dark:text-background"
+                    )}>Pendidikan Komputer</h3>
                     <p className={cn("text-[0.6em] lg:text-sm transition-colors duration-300", !isScrolled && pathName == "/" && "lg:dark:text-background")}>Fakultas Keguruan dan Ilmu Pendidikan</p>
                 </div>
             </div>
