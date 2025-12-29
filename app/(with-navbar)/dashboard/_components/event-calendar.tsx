@@ -12,25 +12,12 @@ import { cn } from "@/lib/utils";
 const hours = Array.from({ length: 24 }, (_, i) => i); // 0 to 23
 
 // Mock events generator
-const generateMockEvents = (baseDate: Date) => {
-   const start = startOfWeek(baseDate);
-   return [
-      { id: "1", title: "Seminar Proposal", date: addDays(start, 1), startHour: 9, duration: 2, type: "proposal", desc: "Ruang Sidang 1" },
-      { id: "2", title: "Seminar Hasil", date: addDays(start, 1), startHour: 11, duration: 1, type: "hasil", desc: "Lab Komputer" },
-      { id: "3", title: "Seminar Proposal", date: addDays(start, 1), startHour: 13, duration: 1, type: "proposal", desc: "Ruang Dosen" },
-      { id: "4", title: "Konsultasi", date: addDays(start, 1), startHour: 14, duration: 1, type: "consultation", desc: "Online (Zoom)" },
-      { id: "5", title: "Seminar Proposal", date: addDays(start, 2), startHour: 9, duration: 1, type: "proposal", desc: "Ruang Sidang 2" },
-      { id: "6", title: "Seminar Proposal", date: addDays(start, 2), startHour: 12, duration: 1, type: "proposal", desc: "Ruang Sidang 1" },
-      { id: "8", title: "Ujian Akhir", date: addDays(start, 2), startHour: 16, duration: 2, type: "ujian", desc: "Ruang Ujian Utama" },
-      { id: "13", title: "Seminar Hasil", date: addDays(start, 4), startHour: 10, duration: 2, type: "hasil", desc: "Lab Jaringan" },
-      { id: "15", title: "Seminar Hasil", date: addDays(start, 5), startHour: 9, duration: 2, type: "proposal", desc: "Ruang Sidang 1" },
-   ] as const;
-};
 
-type EventType = "proposal" | "hasil" | "ujian" | "consultation" | "other";
 
-type CalendarEvent = {
-   id: string;
+export type EventType = "proposal" | "hasil" | "ujian" | "consultation" | "other" | string;
+
+export type CalendarEvent = {
+   id: number;
    title: string;
    date: Date;
    startHour: number;
@@ -38,6 +25,10 @@ type CalendarEvent = {
    type: EventType;
    desc: string;
 };
+
+interface EventCalendarProps {
+   data?: CalendarEvent[];
+}
 
 const getEventStyle = (type: EventType) => {
    switch (type) {
@@ -56,7 +47,7 @@ const getEventStyle = (type: EventType) => {
    }
 }
 
-export function EventCalendar() {
+export function EventCalendar({ data = [] }: EventCalendarProps) {
    const [currentDate, setCurrentDate] = React.useState(new Date());
    const [selectedDate, setSelectedDate] = React.useState(new Date()); // For column highlight
    const [view, setView] = React.useState<"day" | "week" | "month">("week");
@@ -66,7 +57,7 @@ export function EventCalendar() {
    const [detailData, setDetailData] = React.useState<{ date: Date, events: CalendarEvent[] } | null>(null);
 
    // Derived State
-   const events = React.useMemo(() => generateMockEvents(currentDate), [currentDate]);
+   const events = React.useMemo(() => data, [data]);
 
    const daysInView = React.useMemo(() => {
       if (view === "day") {
@@ -260,7 +251,7 @@ export function EventCalendar() {
                         {hours.map((hour) => (
                            <React.Fragment key={hour}>
                               {/* Time Label */}
-                              <div className="border-r border-border/20 border-b border-border/20 p-2 text-right">
+                              <div className="border-r border-border/20 border-b p-2 text-right">
                                  <span className="text-[10px] text-muted-foreground relative -top-2">
                                     {hour === 0 ? "12 AM" : hour < 12 ? `${hour} AM` : hour === 12 ? "12 PM" : `${hour - 12} PM`}
                                  </span>

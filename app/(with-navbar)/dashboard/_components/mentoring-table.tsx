@@ -14,80 +14,30 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type StudentStatus =
+export type StudentStatus =
    | "Selesai"
    | "Ujian Akhir"
    | "Seminar Hasil"
    | "Penelitian"
    | "Seminar Proposal"
-   | "Pengajuan Judul";
+   | "Pengajuan Judul"
+   | string;
 
-type Student = {
-   id: string;
+export type Student = {
+   id: number;
    name: string;
-   avatar: string;
-   title: string;
+   avatar: string | null;
+   title: string | null;
    status: StudentStatus;
-   consultations: string;
-   update: string;
+   consultations?: string;
+   update?: string;
 };
 
-const students: Student[] = [
-   {
-      id: "1",
-      name: "Aditya Pratama",
-      avatar: "/avatars/student1.png",
-      title: "Analisis Pengaruh Literasi Keuangan dan Peng...",
-      status: "Selesai",
-      consultations: "48 Kali",
-      update: "30/01/2025",
-   },
-   {
-      id: "2",
-      name: "Bunga Citra Lestari",
-      avatar: "/avatars/student2.png",
-      title: "Implementasi Algoritma Convolutional Neural...",
-      status: "Ujian Akhir",
-      consultations: "20 Kali",
-      update: "1/10/2025",
-   },
-   {
-      id: "3",
-      name: "Dwi Cahyono",
-      avatar: "/avatars/student1.png",
-      title: "Hubungan Antara Self-Esteem dengan Intensi...",
-      status: "Seminar Hasil",
-      consultations: "23 Kali",
-      update: "12/10/2025",
-   },
-   {
-      id: "4",
-      name: "Fajri Ramadhan",
-      avatar: "/avatars/student1.png",
-      title: "Tinjauan Yuridis Penegakan Hukum Terhadap ...",
-      status: "Penelitian",
-      consultations: "24 Kali",
-      update: "1/10/2025",
-   },
-   {
-      id: "5",
-      name: "Gita Permata",
-      avatar: "/avatars/student2.png",
-      title: "Pengaruh Penambahan Serbuk Abu Ampas Te...",
-      status: "Seminar Proposal",
-      consultations: "18 Kali",
-      update: "12/10/2025",
-   },
-   {
-      id: "6",
-      name: "Hendra Wijaya",
-      avatar: "/avatars/student1.png",
-      title: "Strategi Komunikasi Pemasaran Digital UMKM...",
-      status: "Pengajuan Judul",
-      consultations: "12 Kali",
-      update: "1/10/2025",
-   },
-];
+interface MentoringTableProps {
+   data: Student[];
+}
+
+
 
 const getStatusColor = (status: StudentStatus) => {
    switch (status) {
@@ -106,20 +56,20 @@ const getStatusColor = (status: StudentStatus) => {
    }
 };
 
-export function MentoringTable() {
+export function MentoringTable({ data }: MentoringTableProps) {
    const [sortConfig, setSortConfig] = React.useState<{
       key: keyof Student;
       direction: "asc" | "desc";
    } | null>(null);
 
    const sortedStudents = React.useMemo(() => {
-      let sortableStudents = [...students];
+      let sortableStudents = [...data];
       if (sortConfig !== null) {
          sortableStudents.sort((a, b) => {
-            if (a[sortConfig.key] < b[sortConfig.key]) {
+            if (a[sortConfig.key]!! < b[sortConfig.key]!!) {
                return sortConfig.direction === "asc" ? -1 : 1;
             }
-            if (a[sortConfig.key] > b[sortConfig.key]) {
+            if (a[sortConfig.key]!! > b[sortConfig.key]!!) {
                return sortConfig.direction === "asc" ? 1 : -1;
             }
             return 0;
@@ -185,13 +135,13 @@ export function MentoringTable() {
                         <TableCell className="font-medium">
                            <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
-                                 <AvatarImage src={student.avatar} alt={student.name} />
+                                 <AvatarImage src={student.avatar === null ? undefined : student.avatar} alt={student.name} />
                                  <AvatarFallback>{student.name.substring(0, 2)}</AvatarFallback>
                               </Avatar>
                               <span className="text-sm">{student.name}</span>
                            </div>
                         </TableCell>
-                        <TableCell className="max-w-[300px] truncate text-muted-foreground text-xs" title={student.title}>
+                        <TableCell className="max-w-[300px] truncate text-muted-foreground text-xs" title={student.title === null ? undefined : student.title}>
                            {student.title}
                         </TableCell>
                         <TableCell>

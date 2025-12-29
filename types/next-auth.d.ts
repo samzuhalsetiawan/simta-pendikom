@@ -7,14 +7,13 @@ declare module "next-auth" {
    interface Session extends DefaultSession {
       user: {
          id: number;
-         idNumber: string;
-         role: string;
+         role: "lecturer" | "student";
       } & DefaultSession["user"]
    }
 
    interface User {
-      idNumber: string;
-      role: string;
+      id: number;
+      role: "lecturer" | "student";
    }
 }
 
@@ -22,7 +21,6 @@ declare module "next-auth/jwt" {
    /** Returned by the `jwt` callback and `getToken`, when using JWT sessions */
    interface JWT {
       id: number;
-      idNumber: string;
-      role: string;
+      role: "lecturer" | "student";
    }
 }

@@ -9,15 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ThemeToggleButton } from "@/components/main-navbar/theme-toggle-button"
+import { ThemeToggleButton } from "@/components/navbar/theme-toggle-button"
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons"
 import { HugeiconsIcon } from "@hugeicons/react"
 
-type UserRole = "mahasiswa" | "dosen"
+type UserRole = "student" | "lecturer"
 
 export function LoginForm() {
    const router = useRouter()
-   const [role, setRole] = useState<UserRole>("mahasiswa")
+   const [role, setRole] = useState<UserRole>("student")
    const [idNumber, setIdNumber] = useState("")
    const [password, setPassword] = useState("")
    const [loading, setLoading] = useState(false)
@@ -40,7 +40,7 @@ export function LoginForm() {
             setError("NIM/NIP atau password salah")
             setLoading(false)
          } else if (result?.ok) {
-            router.push("/")
+            router.replace("/")
             router.refresh()
          }
       } catch (err) {
@@ -106,20 +106,20 @@ export function LoginForm() {
                         <SelectValue placeholder="Pilih role" />
                      </SelectTrigger>
                      <SelectContent>
-                        <SelectItem value="mahasiswa">Mahasiswa</SelectItem>
-                        <SelectItem value="dosen">Dosen</SelectItem>
+                        <SelectItem value="student">Mahasiswa</SelectItem>
+                        <SelectItem value="lecturer">Dosen</SelectItem>
                      </SelectContent>
                   </Select>
                </div>
 
                <div className="space-y-2">
                   <Label htmlFor="idNumber">
-                     {role === "mahasiswa" ? "NIM" : "NIP"}
+                     {role === "student" ? "NIM" : "NIP"}
                   </Label>
                   <Input
                      id="idNumber"
                      type="text"
-                     placeholder={role === "mahasiswa" ? "Masukkan NIM" : "Masukkan NIP"}
+                     placeholder={role === "student" ? "Masukkan NIM" : "Masukkan NIP"}
                      value={idNumber}
                      onChange={(e) => setIdNumber(e.target.value)}
                      required

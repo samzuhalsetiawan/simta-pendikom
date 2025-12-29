@@ -13,14 +13,10 @@ import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { UserCircleIcon, Logout01Icon, UserIcon } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
+import { User } from "@/types/user"
 
 interface UserNavProps {
-   user: {
-      name?: string | null
-      email?: string | null
-      image?: string | null
-      role?: string
-   }
+   user: User,
    isScrolled?: boolean,
    className?: string
 }
@@ -61,7 +57,7 @@ export function UserNav({ user, isScrolled, className }: UserNavProps) {
                <div className="flex flex-col space-y-1">
                   <p className="text-sm font-medium leading-none">{user.name}</p>
                   <p className="text-xs leading-none text-muted-foreground uppercase">
-                     {user.role}
+                     {user.role === "lecturer" ? "Dosen" : user.role === "student" ? "Mahasiswa" : "Unknown"}
                   </p>
                </div>
             </DropdownMenuLabel>

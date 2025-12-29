@@ -1,16 +1,32 @@
+import { getServerSession } from "next-auth";
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { authOptions } from "./lib/auth";
 
 export default withAuth(
-   function middleware(req) {
-      const isAuth = !!req.nextauth.token;
-      const isLoginPage = req.nextUrl.pathname === "/login";
-      const requestHeaders = new Headers(req.headers);
-      requestHeaders.set('x-pathname', req.nextUrl.pathname);
+   /*async*/ function middleware(req) {
+      // const { pathname } = req.nextUrl
 
-      if (isLoginPage && isAuth) {
-         return NextResponse.redirect(new URL("/", req.url));
-      }
+      // if (pathname === '/dashboard') {
+      //    const session = await getServerSession(authOptions);
+
+      //    if (!session) {
+      //       return NextResponse.redirect(new URL('/login', req.url))
+      //    }
+
+      //    let target;
+      //    switch (session.user.role) {
+      //       case 'lecturer':
+      //          target = '/dashboard/lecturer';
+      //          break;
+      //       case 'student':
+      //          target = '/dashboard/student';
+      //          break;
+      //       default:
+      //          throw new Error('Invalid role');
+      //    }
+      //    return NextResponse.redirect(new URL(target, req.url))
+      // }
       return null;
    },
    {

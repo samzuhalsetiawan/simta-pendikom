@@ -20,41 +20,24 @@ import {
 } from "lucide-react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-type NotificationItem = {
-   id: string;
+export type NotificationItem = {
+   id: number;
    name: string;
    title: string;
    date: string;
    time: string;
    location: string;
-   avatar: string;
-   type: "consultation" | "seminar";
+   avatar: string | null;
+   type: "consultation" | "seminar" | string;
 };
 
-const items: NotificationItem[] = [
-   {
-      id: "1",
-      name: "Aditya Pratama",
-      title: "Permintaan Konsultasi",
-      date: "Kamis, 14 Agustus 2025",
-      time: "10:00",
-      location: "Ruang Dosen",
-      avatar: "/avatars/student1.png",
-      type: "consultation",
-   },
-   {
-      id: "2",
-      name: "Aditya Pratama",
-      title: "Permintaan Seminar Proposal",
-      date: "Kamis, 14 Agustus 2025",
-      time: "13:00",
-      location: "Ruang Dosen",
-      avatar: "/avatars/student1.png",
-      type: "seminar",
-   },
-];
+interface ImportantSectionProps {
+   data: NotificationItem[];
+}
 
-export function ImportantSection() {
+
+
+export function ImportantSection({ data }: ImportantSectionProps) {
    const [isOpen, setIsOpen] = React.useState(true);
 
    return (
@@ -63,7 +46,7 @@ export function ImportantSection() {
             <div className="flex items-center gap-2">
                <h2 className="text-xl font-semibold">Penting</h2>
                <Badge variant="destructive" className="rounded-full px-2 py-0.5 text-xs">
-                  2
+                  {data.length}
                </Badge>
             </div>
             <Button
@@ -78,12 +61,12 @@ export function ImportantSection() {
 
          {isOpen && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-               {items.map((item) => (
+               {data.map((item) => (
                   <Card key={item.id} className="border-none shadow-sm bg-white dark:bg-zinc-900">
                      <CardContent>
                         <div className="flex items-start gap-3">
                            <Avatar className="h-10 w-10 border border-border">
-                              <AvatarImage src={item.avatar} alt={item.name} />
+                              <AvatarImage src={item.avatar === null ? undefined : item.avatar} alt={item.name} />
                               <AvatarFallback>{item.name.substring(0, 2)}</AvatarFallback>
                            </Avatar>
                            <div className="flex flex-col gap-1 flex-1">

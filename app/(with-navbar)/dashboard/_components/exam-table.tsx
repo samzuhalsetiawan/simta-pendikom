@@ -14,43 +14,22 @@ import { Badge } from "@/components/ui/badge";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type ExamStatus = "Ujian Akhir" | "Seminar Hasil" | "Seminar Proposal";
+export type ExamStatus = "Ujian Akhir" | "Seminar Hasil" | "Seminar Proposal" | string;
 
-type Student = {
-   id: string;
+export type ExamStudent = {
+   id: number;
    name: string;
-   avatar: string;
-   title: string;
+   avatar: string | null;
+   title: string | null;
    status: ExamStatus;
-   upcomingAgenda: string;
+   upcomingAgenda?: string;
 };
 
-const students: Student[] = [
-   {
-      id: "1",
-      name: "Aditya Pratama",
-      avatar: "/avatars/student1.png",
-      title: "Analisis Pengaruh Literasi Keuangan dan Peng...",
-      status: "Ujian Akhir",
-      upcomingAgenda: "30/08/2025 10:00 - R Dosen",
-   },
-   {
-      id: "2",
-      name: "Bunga Citra Lestari",
-      avatar: "/avatars/student2.png",
-      title: "Implementasi Algoritma Convolutional Neural...",
-      status: "Seminar Hasil",
-      upcomingAgenda: "-",
-   },
-   {
-      id: "3",
-      name: "Dwi Cahyono",
-      avatar: "/avatars/student1.png",
-      title: "Hubungan Antara Self-Esteem dengan Intensi...",
-      status: "Seminar Proposal",
-      upcomingAgenda: "12/12/2025 15:00 - Laboratorium",
-   },
-];
+interface ExamTableProps {
+   data: ExamStudent[];
+}
+
+
 
 const getStatusColor = (status: ExamStatus) => {
    switch (status) {
@@ -65,20 +44,20 @@ const getStatusColor = (status: ExamStatus) => {
    }
 };
 
-export function ExamTable() {
+export function ExamTable({ data }: ExamTableProps) {
    const [sortConfig, setSortConfig] = React.useState<{
-      key: keyof Student;
+      key: keyof ExamStudent;
       direction: "asc" | "desc";
    } | null>(null);
 
    const sortedStudents = React.useMemo(() => {
-      let sortableStudents = [...students];
+      let sortableStudents = [...data];
       if (sortConfig !== null) {
          sortableStudents.sort((a, b) => {
-            if (a[sortConfig.key] < b[sortConfig.key]) {
+            if (a[sortConfig.key]!! < b[sortConfig.key]!!) {
                return sortConfig.direction === "asc" ? -1 : 1;
             }
-            if (a[sortConfig.key] > b[sortConfig.key]) {
+            if (a[sortConfig.key]!! > b[sortConfig.key]!!) {
                return sortConfig.direction === "asc" ? 1 : -1;
             }
             return 0;
@@ -87,7 +66,7 @@ export function ExamTable() {
       return sortableStudents;
    }, [sortConfig]);
 
-   const requestSort = (key: keyof Student) => {
+   const requestSort = (key: keyof ExamStudent) => {
       let direction: "asc" | "desc" = "asc";
       if (
          sortConfig &&
@@ -99,7 +78,7 @@ export function ExamTable() {
       setSortConfig({ key, direction });
    };
 
-   const getSortIcon = (key: keyof Student) => {
+   const getSortIcon = (key: keyof ExamStudent) => {
       if (sortConfig?.key !== key) return <div className="flex flex-col"><ChevronUp className="h-2 w-2 opacity-30" /><ChevronDown className="h-2 w-2 opacity-30" /></div>;
       return sortConfig.direction === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />;
    }
@@ -139,13 +118,13 @@ export function ExamTable() {
                         <TableCell className="font-medium">
                            <div className="flex items-center gap-3">
                               <Avatar className="h-8 w-8">
-                                 <AvatarImage src={student.avatar} alt={student.name} />
+                                 <AvatarImage src={student.avatar === null ? undefined : student.avatar} alt={student.name} />
                                  <AvatarFallback>{student.name.substring(0, 2)}</AvatarFallback>
                               </Avatar>
                               <span className="text-sm">{student.name}</span>
                            </div>
                         </TableCell>
-                        <TableCell className="max-w-[300px] truncate text-muted-foreground text-xs" title={student.title}>
+                        <TableCell className="max-w-[300px] truncate text-muted-foreground text-xs" title={student.title === null ? undefined : student.title}>
                            {student.title}
                         </TableCell>
                         <TableCell>

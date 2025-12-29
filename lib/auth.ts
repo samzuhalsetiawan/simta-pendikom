@@ -1,7 +1,11 @@
-import type { NextAuthOptions } from "next-auth";
+import { getServerSession, type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcryptjs from "bcryptjs";
-import pool from "./db";
+import { pool } from "./db/connection";
+import { User } from "@/types/user";
+import { getLecturerById } from "./db/lecturer";
+import { cache } from "react";
+import { getStudentById } from "./db/student";
 
 export const authOptions: NextAuthOptions = {
    providers: [
@@ -19,11 +23,21 @@ export const authOptions: NextAuthOptions = {
             }
 
             try {
-               const tableName = credentials.role === "mahasiswa" ? "student" : "lecturer";
-               const idNumberColumn = credentials.role === "mahasiswa" ? "nim" : "nip";
+               const tableName = credentials.role === "student" ? "student"
+                  : credentials.role === "lecturer" ? "lecturer"
+                     : undefined;
+               if (!tableName) {
+                  throw new Error("Invalid role");
+               }
+               const idNumberColumn = credentials.role === "student" ? "nim"
+                  : credentials.role === "lecturer" ? "nip"
+                     : undefined;
+               if (!idNumberColumn) {
+                  throw new Error("Invalid role");
+               }
 
                const [rows] = await pool.execute(
-                  `SELECT id, ${idNumberColumn} as idNumber, name, email, image, password FROM ${tableName} WHERE ${idNumberColumn} = ?`,
+                  `SELECT id, ${idNumberColumn} as idNumber, password FROM ${tableName} WHERE ${idNumberColumn} = ?`,
                   [credentials.idNumber]
                );
 
@@ -41,11 +55,7 @@ export const authOptions: NextAuthOptions = {
 
                return {
                   id: user.id,
-                  idNumber: user.idNumber,
-                  name: user.name,
-                  email: user.email,
-                  image: user.image,
-                  role: credentials.role,
+                  role: credentials.role as "lecturer" | "student",
                };
             } catch (error) {
                console.error("Auth error:", error);
@@ -58,16 +68,14 @@ export const authOptions: NextAuthOptions = {
       async jwt({ token, user }) {
          if (user) {
             token.id = Number(user.id);
-            token.idNumber = user.idNumber;
             token.role = user.role;
          }
          return token;
       },
       async session({ session, token }) {
          if (session.user) {
-            session.user.id = token.id as number;
-            session.user.idNumber = token.idNumber as string;
-            session.user.role = token.role as string;
+            session.user.id = token.id;
+            session.user.role = token.role;
          }
          return session;
       },
@@ -77,7 +85,33 @@ export const authOptions: NextAuthOptions = {
    },
    session: {
       strategy: "jwt",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 1 * 60 * 60, // 1 hours
    },
    secret: process.env.NEXTAUTH_SECRET,
 };
+
+export const getAuthenticatedUser: () => Promise<User | undefined> = cache(async () => {
+   const session = await getServerSession(authOptions);
+   if (!session) return;
+   const user = session.user;
+   if (user.role == "lecturer") {
+      const lecturer = await getLecturerById(user.id);
+      if (!lecturer) return;
+      return {
+         name: lecturer.name,
+         email: lecturer.email,
+         image: lecturer.image,
+         role: "lecturer",
+      };
+   } else if (user.role == "student") {
+      const student = await getStudentById(user.id);
+      if (!student) return;
+      return {
+         name: student.name,
+         email: student.email,
+         image: student.image,
+         role: "student",
+      };
+   }
+   return;
+})
