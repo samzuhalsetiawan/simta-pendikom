@@ -2,8 +2,16 @@ export interface Lecturer {
    id: number;
    nip: string;
    name: string;
-   email: string | null;
-   image: string | null;
+   email?: string;
+   image?: string;
+}
+
+export type Supervisor = Lecturer & {
+   role: typeof LECTURER_ROLE_LABELS[typeof LECTURER_ROLES.SUPERVISOR];
+}
+
+export type Examiner = Lecturer & {
+   role: typeof LECTURER_ROLE_LABELS[typeof LECTURER_ROLES.EXAMINER];
 }
 
 export const LECTURER_ROLES = {

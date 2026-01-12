@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import * as React from "react"
+import { eachWeekOfInterval, endOfISOWeek, format, startOfISOWeek } from "date-fns"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -23,3 +24,25 @@ export function useIsMobile() {
 
   return !!isMobile
 }
+
+/**
+ * Mendapatkan rentang Senin-Minggu dari sebuah tanggal
+ * Output format: { start: "05-01-2026", end: "11-01-2026" }
+ */
+export const getISOWeekRange = (date: Date) => {
+  return {
+    start: format(startOfISOWeek(date), 'dd-MM-yyyy'),
+    end: format(endOfISOWeek(date), 'dd-MM-yyyy'),
+  };
+};
+
+/**
+ * Menghasilkan daftar range minggu.
+ */
+export const getWeeksInRange = (start: Date, end: Date) => {
+  
+  // Mengambil semua awal minggu (Senin) dalam bulan tersebut
+  const weeks = eachWeekOfInterval({ start, end }, { weekStartsOn: 1 });
+  
+  return weeks.map(weekDate => getISOWeekRange(weekDate));
+};

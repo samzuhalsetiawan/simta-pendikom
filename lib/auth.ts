@@ -1,11 +1,9 @@
-import { getServerSession, type NextAuthOptions } from "next-auth";
+import "server-only";
+
+import { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcryptjs from "bcryptjs";
-import { pool } from "./db/connection";
-import { User } from "@/types/user";
-import { getLecturerById } from "./db/lecturer";
-import { cache } from "react";
-import { getStudentById } from "./db/student";
+import { pool } from "./db";
 
 export const authOptions: NextAuthOptions = {
    providers: [
@@ -89,29 +87,3 @@ export const authOptions: NextAuthOptions = {
    },
    secret: process.env.NEXTAUTH_SECRET,
 };
-
-export const getAuthenticatedUser: () => Promise<User | undefined> = cache(async () => {
-   const session = await getServerSession(authOptions);
-   if (!session) return;
-   const user = session.user;
-   if (user.role == "lecturer") {
-      const lecturer = await getLecturerById(user.id);
-      if (!lecturer) return;
-      return {
-         name: lecturer.name,
-         email: lecturer.email,
-         image: lecturer.image,
-         role: "lecturer",
-      };
-   } else if (user.role == "student") {
-      const student = await getStudentById(user.id);
-      if (!student) return;
-      return {
-         name: student.name,
-         email: student.email,
-         image: student.image,
-         role: "student",
-      };
-   }
-   return;
-})

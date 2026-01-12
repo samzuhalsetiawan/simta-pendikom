@@ -6,14 +6,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ImportantSection, NotificationItem } from "@/app/(with-navbar)/dashboard/_components/important-section";
 import { MentoringTable, Student } from "@/app/(with-navbar)/dashboard/_components/mentoring-table";
 import { ExamTable, ExamStudent } from "@/app/(with-navbar)/dashboard/_components/exam-table";
-import { EventCalendar, CalendarEvent } from "@/app/(with-navbar)/dashboard/_components/event-calendar";
+import { EventCalendar, CalendarEvent } from "@/app/(with-navbar)/dashboard/_components/event-calendar/event-calendar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getLecturerById, getLecturerEvent, getLecturerNeedApproval, getLecturerThesis } from "@/lib/db/lecturer";
 import { Lecturer } from "@/types/lecturer";
 import { Event } from "@/types/event";
 import { Thesis } from "@/types/thesis";
+import { getLecturerById } from "@/data/lecturer/get-lecturer-by-id";
+import { getLecturerNeedApproval } from "@/data/lecturer/get-lecturer-need-approval";
+import { getLecturerThesis } from "@/data/lecturer/get-lecturer-thesis";
+import { getLecturerEvent } from "@/data/lecturer/get-lecturer-event";
 
 // Data Fetchers
 async function getLecturer(id: number): Promise<Lecturer> {

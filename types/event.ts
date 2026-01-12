@@ -26,7 +26,7 @@ export interface BaseEvent {
 
 export interface Consultation extends BaseEvent {
    type: typeof EVENT_TYPE_LABELS["consultation"];
-   topic: string | null;
+   topic?: string;
 }
 
 export interface SeminarProposal extends BaseEvent {

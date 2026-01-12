@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
+// @ts-ignore
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { Providers } from "@/components/providers";
+import { Provider } from "@/components/provider/provider";
 import { Toaster } from "sonner";
 
 
@@ -26,10 +27,10 @@ export default async function RootLayout({
   return (
     <html lang="en" className={cn(inter.variable)} suppressHydrationWarning>
       <body className={cn(geistSans.variable, geistMono.variable, "antialiased overflow-x-hidden")}>
-        <Providers>
+        <Provider>
           {children}
           <Toaster richColors position="top-right" />
-        </Providers>
+        </Provider>
       </body>
     </html>
   );

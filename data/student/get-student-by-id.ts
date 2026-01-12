@@ -1,4 +1,6 @@
-import { pool } from "@/lib/db/connection";
+import "server-only";
+
+import { pool } from "@/lib/db";
 import { Student } from "@/types/student";
 import sql from "sql-template-strings";
 

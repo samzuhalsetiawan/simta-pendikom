@@ -3,8 +3,9 @@
 import { SessionProvider } from "next-auth/react"
 import { ThemeProvider } from "next-themes"
 import { NavbarScrollProvider } from "@/components/navbar-scroll-context"
+import { TopProgressBarProvider } from "./top-progress-bar/top-progress-bar-provider"
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function ClientProvider({ children }: { children: React.ReactNode }) {
    return (
       <SessionProvider>
          <ThemeProvider
@@ -13,9 +14,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
             enableSystem
             disableTransitionOnChange
          >
-            <NavbarScrollProvider>
-               {children}
-            </NavbarScrollProvider>
+            <TopProgressBarProvider>
+               <NavbarScrollProvider>
+                  {children}
+               </NavbarScrollProvider>
+            </TopProgressBarProvider>
          </ThemeProvider>
       </SessionProvider>
    )

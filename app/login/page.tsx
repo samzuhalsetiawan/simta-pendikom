@@ -1,11 +1,8 @@
-"use server";
-
 import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { LoginForm } from "./login-form";
-import { Skeleton } from "@/components/ui/skeleton";
 
 async function getSystemStatus() {
    // Simulating a fetch for system announcement or status

@@ -24,7 +24,7 @@ export type ThesisStatus = typeof THESIS_STATUS_LABELS[keyof typeof THESIS_STATU
 
 export interface Thesis {
    id: number;
-   title: string | null;
+   title?: string;
    progress: ThesisStatus;
    student: Student;
    lecturers: (Lecturer & { role: LecturerRole })[];

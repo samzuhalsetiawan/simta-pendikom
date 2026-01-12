@@ -10,15 +10,15 @@ import { cn } from "@/lib/utils";
 import { navigationData, type NavigationData } from "./navbar-data";
 import { UserNav } from "./user-nav";
 import { TopNavbarMenuLink } from "./top-navbar-menu";
-import { getAuthenticatedUser } from "@/lib/auth";
 import { TopNavbarMenuDropdown } from "./top-navbar-menu-dropdown";
+import { requireAuthenticatedUser } from "@/data/user/require-authenticated-user";
 
 interface TopNavbarProps extends React.ComponentProps<typeof NavigationMenu> { }
 
 export async function TopNavbar(
    { className, ...props }: TopNavbarProps
 ) {
-   const user = await getAuthenticatedUser();
+   const user = await requireAuthenticatedUser();
 
    // Filter out Login link if user is authenticated
    const filteredNavData = navigationData.filter(item => {
