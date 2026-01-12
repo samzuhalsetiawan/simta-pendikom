@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button"
 import { MessageSquare } from "lucide-react"
 import { useState } from "react";
 import { RequestConsultationDialog } from "./request-consultation-dialog";
-import { Supervisor } from "@/types/lecturer";
+import { Supervisor } from "@/types/user/lecturer";
 
 const DUMMY_SUPERVISORS: Supervisor[] = [
    { id: 1, name: "Dr. Ahmad Fauzi, M.Kom", nip: "198505152010121001", role: "Pembimbing" as const, image: "/avatars/default.png" },

@@ -2,7 +2,7 @@ import { Users } from "lucide-react";
 import { Card, CardContent } from "../ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Student } from "@/types/student";
-import { Lecturer } from "@/types/lecturer";
+import { Lecturer } from "@/types/user/lecturer";
 import { cn } from "@/lib/utils";
 
 type UserProfileProps = React.ComponentProps<"div"> & {

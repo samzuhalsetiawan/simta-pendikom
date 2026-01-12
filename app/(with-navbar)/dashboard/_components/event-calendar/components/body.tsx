@@ -5,7 +5,7 @@ import { EventCalendarView } from "../event-calendar";
 import { useDaysInView } from "../hooks/days-in-view";
 import { Fragment, useEffect, useMemo } from "react";
 import { endOfISOWeek, endOfMonth, endOfWeek, isSameDay, startOfISOWeek, startOfMonth, startOfWeek } from "date-fns";
-import { Event, EventType } from "@/types/event";
+import { Event, EventType } from "@/types/event/event";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Consultation, Event, EventType } from "@/types/event";
+import { Consultation, Event, EventType } from "@/types/event/event";
 import { on } from "events";
 import { useDaysInView } from "./hooks/days-in-view";
 import { EventCalendarBody } from "./components/body";

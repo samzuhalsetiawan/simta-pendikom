@@ -1,7 +1,7 @@
 import "server-only";
 
 import { pool } from "@/lib/db";
-import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/lecturer";
+import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/user/lecturer";
 import { Thesis, THESIS_STATUS_LABELS, ThesisStatusRaw } from "@/types/thesis";
 import sql from "sql-template-strings";
 

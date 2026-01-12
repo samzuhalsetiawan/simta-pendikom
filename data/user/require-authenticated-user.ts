@@ -1,7 +1,7 @@
 import "server-only";
 
 import { authOptions } from "@/lib/auth";
-import { User } from "@/types/user";
+import { User } from "@/types/user/user";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { cache } from "react";

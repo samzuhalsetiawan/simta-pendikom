@@ -1,8 +1,8 @@
 import "server-only";
 
 import { pool } from "@/lib/db";
-import { Event, EVENT_TYPE_LABELS, EventTypeRaw } from "@/types/event";
-import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/lecturer";
+import { Event, EVENT_TYPE_LABELS, EventTypeRaw } from "@/types/event/event";
+import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/user/lecturer";
 import { Thesis, THESIS_STATUS_LABELS, ThesisStatusRaw } from "@/types/thesis";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import sql from "sql-template-strings";

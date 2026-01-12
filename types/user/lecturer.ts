@@ -1,4 +1,4 @@
-export interface Lecturer {
+export type Lecturer = {
    id: number;
    nip: string;
    name: string;

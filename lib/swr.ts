@@ -1,6 +1,6 @@
 "use client";
 
-import { Event } from "@/types/event";
+import { Event } from "@/types/event/event";
 import { useEffect } from "react";
 
 export const fetcher = async (urls: string[]) => {

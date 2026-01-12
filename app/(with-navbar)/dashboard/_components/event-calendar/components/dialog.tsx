@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { getEventStyle } from "./body";
 import { Button } from "@/components/ui/button";
-import { Event } from "@/types/event";
+import { Event } from "@/types/event/event";
 
 type CalendarEventDialogProps = {
    isDetailOpen: boolean;

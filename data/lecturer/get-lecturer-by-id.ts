@@ -1,7 +1,7 @@
 import "server-only";
 
 import { pool } from "@/lib/db";
-import { Lecturer } from "@/types/lecturer";
+import { Lecturer } from "@/types/user/lecturer";
 import sql from "sql-template-strings";
 
 type GetLecturerByIdQueryRow = {

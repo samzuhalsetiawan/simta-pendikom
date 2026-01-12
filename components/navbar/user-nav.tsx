@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { UserCircleIcon, Logout01Icon, UserIcon } from "@hugeicons/core-free-icons"
 import { cn } from "@/lib/utils"
-import { User } from "@/types/user"
+import { User } from "@/types/user/user"
 
 interface UserNavProps {
    user: User,

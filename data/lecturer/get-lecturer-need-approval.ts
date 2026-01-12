@@ -1,12 +1,12 @@
 import "server-only";
 
 import { pool } from "@/lib/db";
-import { EVENT_TYPE_LABELS, EventTypeRaw } from "@/types/event";
-import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/lecturer";
+import { EVENT_TYPE_LABELS, EventTypeRaw } from "@/types/event/event";
+import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/user/lecturer";
 import { THESIS_STATUS_LABELS, ThesisStatusRaw } from "@/types/thesis";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import sql from "sql-template-strings";
-import { Event } from "@/types/event"
+import { Event } from "@/types/event/event"
 
 type GetLecturerNeedApprovalQueryRow = {
    raw_type: EventTypeRaw;

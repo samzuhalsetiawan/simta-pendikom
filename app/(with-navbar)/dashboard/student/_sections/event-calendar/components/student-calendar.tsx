@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, User, Users } from "lucide-react";
 import { format } from "date-fns";
-import { Event } from "@/types/event";
+import { Event } from "@/types/event/event";
 import { CalendarEventDialog } from "@/app/(with-navbar)/dashboard/_components/event-calendar/components/dialog";
 
 interface StudentCalendarProps {

@@ -1,7 +1,7 @@
 "use client"
 
 import { getWeeksInRange } from "@/lib/utils";
-import { Event } from "@/types/event";
+import { Event } from "@/types/event/event";
 import { eachWeekOfInterval, endOfISOWeek, endOfMonth, format, startOfISOWeek, startOfMonth } from "date-fns";
 import { useMemo } from "react";
 import useSWR from "swr"

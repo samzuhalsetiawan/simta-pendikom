@@ -1,4 +1,4 @@
-import { Lecturer, LecturerRole } from "./lecturer";
+import { Lecturer, LecturerRole } from "./user/lecturer";
 import { Student } from "./student";
 
 export const THESIS_STATUS = {

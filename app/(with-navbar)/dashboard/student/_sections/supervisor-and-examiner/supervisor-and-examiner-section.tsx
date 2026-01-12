@@ -1,6 +1,6 @@
 import { ProfileCard } from "@/components/profile-card/profile-card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Examiner, Supervisor } from "@/types/lecturer";
+import { Examiner, Supervisor } from "@/types/user/lecturer";
 
 const DUMMY_SUPERVISORS: Supervisor[] = [
    { id: 1, name: "Dr. Ahmad Fauzi, M.Kom", nip: "198505152010121001", role: "Pembimbing" as const, image: "/avatars/default.png" },

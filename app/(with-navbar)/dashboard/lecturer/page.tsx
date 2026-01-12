@@ -10,8 +10,8 @@ import { EventCalendar, CalendarEvent } from "@/app/(with-navbar)/dashboard/_com
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { Lecturer } from "@/types/lecturer";
-import { Event } from "@/types/event";
+import { Lecturer } from "@/types/user/lecturer";
+import { Event } from "@/types/event/event";
 import { Thesis } from "@/types/thesis";
 import { getLecturerById } from "@/data/lecturer/get-lecturer-by-id";
 import { getLecturerNeedApproval } from "@/data/lecturer/get-lecturer-need-approval";
