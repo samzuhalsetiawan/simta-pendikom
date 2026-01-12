@@ -1,6 +1,6 @@
-export interface User {
-   name: string;
-   email: string | null;
-   image: string | null;
-   role: "lecturer" | "student";
-}
+import { Lecturer } from "./lecturer";
+import { Student } from "./student";
+
+export type User =
+   | Lecturer
+   | Student

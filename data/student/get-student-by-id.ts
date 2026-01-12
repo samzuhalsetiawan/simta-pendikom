@@ -1,8 +1,8 @@
 import "server-only";
 
 import { pool } from "@/lib/db";
-import { Student } from "@/types/student";
 import sql from "sql-template-strings";
+import { Student } from "@/types/user/student";
 
 type GetStudentByIdQueryRow = {
    id: number;
@@ -33,7 +33,7 @@ export async function getStudentById(id: string | number): Promise<Student | und
       id: student.id,
       nim: student.nim,
       name: student.name,
-      email: student.email,
-      image: student.image
+      email: student.email || undefined,
+      image: student.image || undefined
     } satisfies Student;
 }
