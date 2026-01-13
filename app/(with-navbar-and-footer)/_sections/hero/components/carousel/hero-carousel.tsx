@@ -1,26 +1,28 @@
-import {
-    Carousel,
-    CarouselContent,
-    CarouselItem,
-} from "@/components/ui/carousel"
-import { cn } from "@/lib/utils"
-import { AutoplayCarousel } from "./autoplay-carousel"
+import { CarouselContent, CarouselItem } from "@/components/ui/carousel";
+import carouselImage1 from "./img/carousel1.png";
+import carouselImage2 from "./img/carousel2.png";
+import carouselImage3 from "./img/carousel3.png";
+import Image from "next/image";
+import { AutoplayCarousel } from "./autoplay-carousel";
 
-export function HeroCarousel({
-    ...props
-}: React.ComponentProps<typeof Carousel>) {
+type HeroCarouselProps = {
+  className?: string;
+};
 
-    return (
-        <AutoplayCarousel >
-            <CarouselContent {...props}>
-                {Array.from({ length: 3 }).map((_, index) => (
-                    <CarouselItem className="" key={index}>
-                        <div className="w-screen aspect-video overflow-hidden">
-                            <img className={cn("w-full h-full object-cover object-center", index === 1 ? "scale-x-[-1]" : "")} src={`/carousel-dummy${index + 1}.png`} alt="Dummy Image" />
-                        </div>
-                    </CarouselItem>
-                ))}
-            </CarouselContent>
-        </AutoplayCarousel>
-    )
+export function HeroCarousel({ className }: HeroCarouselProps) {
+  return (
+    <AutoplayCarousel className={className}>
+      <CarouselContent>
+        {[carouselImage1, carouselImage2, carouselImage3].map(
+          (image, index) => {
+            return (
+              <CarouselItem key={index}>
+                <Image src={image} alt="Carousel Image" />;
+              </CarouselItem>
+            );
+          }
+        )}
+      </CarouselContent>
+    </AutoplayCarousel>
+  );
 }
