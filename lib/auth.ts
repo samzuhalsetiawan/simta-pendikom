@@ -21,17 +21,27 @@ export const authOptions: NextAuthOptions = {
             }
 
             try {
-               const tableName = credentials.role === "student" ? "student"
-                  : credentials.role === "lecturer" ? "lecturer"
-                     : undefined;
-               if (!tableName) {
-                  throw new Error("Invalid role");
+
+               let tableName: "student" | "lecturer";
+               switch (credentials.role) {
+                  case "student":
+                     tableName = "student";
+                     break;
+                  case "lecturer":
+                     tableName = "lecturer";
+                     break;
+                  default:
+                     throw new Error("Invalid role");
                }
-               const idNumberColumn = credentials.role === "student" ? "nim"
-                  : credentials.role === "lecturer" ? "nip"
-                     : undefined;
-               if (!idNumberColumn) {
-                  throw new Error("Invalid role");
+
+               let idNumberColumn: "nip" | "nim";
+               switch (tableName) {
+                  case "student":
+                     idNumberColumn = "nim";
+                     break;
+                  case "lecturer":
+                     idNumberColumn = "nip";
+                     break;
                }
 
                const [rows] = await pool.execute(
@@ -53,7 +63,7 @@ export const authOptions: NextAuthOptions = {
 
                return {
                   id: user.id,
-                  role: credentials.role as "lecturer" | "student",
+                  role: credentials.role,
                };
             } catch (error) {
                console.error("Auth error:", error);

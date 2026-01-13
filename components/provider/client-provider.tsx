@@ -1,8 +1,8 @@
 "use client"
 
 import { SessionProvider } from "next-auth/react"
-import { ThemeProvider } from "next-themes"
-import { NavbarScrollProvider } from "@/components/navbar-scroll-context"
+import { ThemeProvider } from "./theme/theme-provider"
+import { NavbarScrollProvider } from "@/components/provider/navbar-scroll/navbar-scroll-provider"
 import { TopProgressBarProvider } from "./top-progress-bar/top-progress-bar-provider"
 
 export function ClientProvider({ children }: { children: React.ReactNode }) {

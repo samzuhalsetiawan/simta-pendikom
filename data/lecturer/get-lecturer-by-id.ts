@@ -10,11 +10,12 @@ type GetLecturerByIdQueryRow = {
    name: string;
    email: string | null;
    image: string | null;
+   is_admin: boolean;
 };
 
-export async function getLecturerById(id: number): Promise<Lecturer | undefined> {
+export async function getLecturerById(id: number) {
    const query = sql`
-   SELECT id, nip, name, email, image 
+   SELECT id, nip, name, email, image, is_admin
    FROM lecturer 
    WHERE id = ${id}
    LIMIT 1
@@ -27,7 +28,8 @@ export async function getLecturerById(id: number): Promise<Lecturer | undefined>
       id: lecturer.id,
       nip: lecturer.nip,
       name: lecturer.name,
-      email: lecturer.email,
-      image: lecturer.image,
+      email: lecturer.email === null ? undefined : lecturer.email,
+      image: lecturer.image === null ? undefined : lecturer.image,
+      isAdmin: lecturer.is_admin,
    } satisfies Lecturer;
 }

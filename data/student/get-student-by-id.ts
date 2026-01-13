@@ -33,7 +33,7 @@ export async function getStudentById(id: string | number): Promise<Student | und
       id: student.id,
       nim: student.nim,
       name: student.name,
-      email: student.email || undefined,
-      image: student.image || undefined
+      email: student.email === null ? undefined : student.email,
+      image: student.image === null ? undefined : student.image,
     } satisfies Student;
 }
