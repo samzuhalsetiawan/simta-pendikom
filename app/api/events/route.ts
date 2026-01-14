@@ -1,6 +1,6 @@
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
-import { getLecturerEvent } from "@/data/lecturer/get-lecturer-event2";
+import { getLecturerEvent } from "@/data/lecturer/get-lecturer-event";
 import { getStudentEvent } from "@/data/student/get-student-event";
 import { parse } from "date-fns";
 

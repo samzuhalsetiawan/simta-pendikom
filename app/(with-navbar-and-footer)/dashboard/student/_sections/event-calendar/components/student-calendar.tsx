@@ -1,14 +1,14 @@
 "use client";
 
 import { use, useState } from "react";
-import { EventCalendar, EventCalendarView } from "@/app/(with-navbar-and-footer)/dashboard/_components/event-calendar/event-calendar";
+import { EventCalendar, EventCalendarView } from "@/components/common/event-calendar/event-calendar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, User, Users } from "lucide-react";
 import { format } from "date-fns";
 import { Event } from "@/types/event/event";
-import { CalendarEventDialog } from "@/app/(with-navbar-and-footer)/dashboard/_components/event-calendar/components/dialog";
+import { CalendarEventDialog } from "@/components/common/event-calendar/components/dialog";
 
 interface StudentCalendarProps {
    eventsPromise: Promise<Event[]>;

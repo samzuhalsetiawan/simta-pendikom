@@ -1,4 +1,4 @@
-import { Lecturer, LecturerRole } from "./user/lecturer";
+import { Examiner, Supervisor } from "./user/lecturer";
 import { Student } from "./user/student";
 
 export const thesisStatus = [
@@ -17,5 +17,5 @@ export interface Thesis {
   title?: string;
   progress: ThesisStatus;
   student: Student;
-  lecturers: (Lecturer & { role: LecturerRole })[];
+  lecturers: (Supervisor | Examiner)[];
 }

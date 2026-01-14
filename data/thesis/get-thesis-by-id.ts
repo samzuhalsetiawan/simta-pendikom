@@ -1,28 +1,29 @@
 import "server-only";
 
 import { pool } from "@/lib/db";
-import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/user/lecturer";
-import { Thesis, THESIS_STATUS_LABELS, ThesisStatusRaw } from "@/types/thesis";
 import sql from "sql-template-strings";
+import { Thesis, ThesisStatus } from "@/types/thesis";
+import { LecturerRole } from "@/types/user/lecturer";
 
 type GetThesisByIdQueryRow = {
   id: number;
-  title: string | null;
-  progress_status: ThesisStatusRaw;
+  title?: string;
+  progress_status: ThesisStatus;
   student: {
     id: number;
     nim: string;
     name: string;
-    email: string | null;
-    image: string | null;
+    email?: string;
+    image?: string;
   };
   lecturers: {
     id: number;
     nip: string;
     name: string;
-    email: string | null;
-    image: string | null;
-    role: LecturerRoleRaw;
+    email?: string;
+    image?: string;
+    is_admin: boolean;
+    role: LecturerRole;
   }[];
 };
 
@@ -47,7 +48,8 @@ export async function getThesisById(id: number): Promise<Thesis | undefined> {
               'name', l.name,
               'email', l.email,
               'image', l.image,
-              'role', tl.role
+              'role', tl.role,
+              'is_admin', l.is_admin
             )
           )
           FROM thesis_lecturers tl
@@ -67,18 +69,20 @@ export async function getThesisById(id: number): Promise<Thesis | undefined> {
 
   const row: GetThesisByIdQueryRow = rows[0];
 
-  const formattedData: Thesis = {
-    id: row.id,
-    title: row.title || "Belum ada judul",
-    progress: (THESIS_STATUS_LABELS)[row.progress_status] || row.progress_status,
-    // JSON object bisa menjadi string atau object tergantung driver/versi dbms
-    student: typeof row.student === 'string' ? JSON.parse(row.student) : row.student,
-    lecturers: (typeof row.lecturers === 'string' ? JSON.parse(row.lecturers) : (row.lecturers || []))
-      .map((lecturer: typeof row.lecturers[0]) => ({
-        ...lecturer,
-        role: (LECTURER_ROLE_LABELS)[lecturer.role] || lecturer.role,
-      })),
-  } satisfies Thesis;
+  return mapToThesis(row) satisfies Thesis;
+}
 
-  return formattedData;
+const mapToThesis = (row: GetThesisByIdQueryRow) => {
+  const { progress_status, lecturers, ...rest } = row;
+  return {
+    ...rest,
+    progress: progress_status,
+    lecturers: lecturers.map(lec => {
+      const { is_admin, ...lecturerRest } = lec;
+      return {
+        ...lecturerRest,
+        isAdmin: is_admin
+      }
+    }),
+  } satisfies Thesis
 }

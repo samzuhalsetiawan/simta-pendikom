@@ -8,8 +8,8 @@ type GetStudentByIdQueryRow = {
    id: number;
    nim: string;
    name: string;
-   email: string | null;
-   image: string | null;
+   email?: string;
+   image?: string;
 }
 
 export async function getStudentById(id: string | number): Promise<Student | undefined> {
@@ -28,12 +28,13 @@ export async function getStudentById(id: string | number): Promise<Student | und
     const [rows]: any = await pool.query(query);
     rows satisfies GetStudentByIdQueryRow[]
     if (rows.length === 0) return;
-    const student = rows[0] as GetStudentByIdQueryRow
-    return {
-      id: student.id,
-      nim: student.nim,
-      name: student.name,
-      email: student.email === null ? undefined : student.email,
-      image: student.image === null ? undefined : student.image,
-    } satisfies Student;
+    const row = rows[0] as GetStudentByIdQueryRow
+    return mapToStudent(row) satisfies Student;
 }
+
+const mapToStudent = (row: GetStudentByIdQueryRow) => {
+  const { ...rest } = row; 
+  return {
+      ...rest,
+   } satisfies Student;
+} 

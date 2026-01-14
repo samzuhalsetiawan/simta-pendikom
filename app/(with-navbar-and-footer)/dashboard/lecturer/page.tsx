@@ -11,7 +11,7 @@ import {
   ExamTable,
   ExamStudent,
 } from "@/app/(with-navbar-and-footer)/dashboard/lecturer/_sections/examined-students-table/components/examined-students-table";
-import { EventCalendar } from "@/app/(with-navbar-and-footer)/dashboard/_components/event-calendar/event-calendar";
+import { EventCalendar } from "@/components/common/event-calendar/event-calendar";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -26,6 +26,7 @@ import { TopStatsSection } from "./_sections/top-stats/top-stats-section";
 import { ImportantSection } from "./_sections/important/important-section";
 import { SupervisedStudentsTableSection } from "./_sections/supervised-students-table/supervised-students-table-section";
 import { ExaminedStudentsTableSection } from "./_sections/examined-students-table/examined-students-table-sections";
+import { EventCalendarSection } from "./_sections/event-calendar/event-calendar-section";
 
 // Data Fetchers
 async function getLecturer(id: number): Promise<Lecturer> {
@@ -44,21 +45,6 @@ async function getThesis(id: number): Promise<Thesis[]> {
 
 async function getEvents(id: number): Promise<Event[]> {
   return await getLecturerEvent(id);
-}
-
-async function CalendarWrapper({ promise }: { promise: Promise<Event[]> }) {
-  const events = await promise;
-  const calendarEvents: CalendarEvent[] = events.map((event, idx) => ({
-    id: event.id,
-    title: event.type,
-    date: new Date(event.date),
-    startHour: event.date ? new Date(event.date).getHours() : 9,
-    duration: 2,
-    type: event.type,
-    desc: event.location || "No location",
-  }));
-
-  return <EventCalendar data={calendarEvents} />;
 }
 
 // Page Component
@@ -96,9 +82,7 @@ export default async function Page() {
       <ExaminedStudentsTableSection studentsThesis={} />
 
       {/* Calendar */}
-      <Suspense fallback={<Skeleton className="h-96 w-full rounded-lg" />}>
-        <CalendarWrapper promise={eventPromise} />
-      </Suspense>
+      <EventCalendarSection />
     </div>
   );
 }

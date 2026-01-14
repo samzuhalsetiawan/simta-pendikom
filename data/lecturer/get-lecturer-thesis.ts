@@ -1,14 +1,14 @@
 import "server-only";
 
 import { pool } from "@/lib/db";
-import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/user/lecturer";
-import { Thesis, THESIS_STATUS_LABELS, ThesisStatusRaw } from "@/types/thesis";
 import sql from "sql-template-strings";
+import { Thesis, ThesisStatus } from "@/types/thesis";
+import { Lecturer, LecturerRole } from "@/types/user/lecturer";
 
 type GetLecturerThesisQueryRow = {
    id: number;
    title: string;
-   progress_status: ThesisStatusRaw;
+   progress_status: ThesisStatus;
    student: {
       id: number;
       nim: string;
@@ -22,7 +22,8 @@ type GetLecturerThesisQueryRow = {
       name: string;
       email: string;
       image: string;
-      role: LecturerRoleRaw;
+      is_admin: boolean;
+      role: LecturerRole;
    }[];
 };
 
@@ -33,7 +34,7 @@ export async function getLecturerThesis(id: number): Promise<Thesis[]> {
         JSON_OBJECT('id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image) AS student,
         (
           SELECT JSON_ARRAYAGG(
-            JSON_OBJECT('id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role)
+            JSON_OBJECT('id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin)
           )
           FROM thesis_lecturers tl
           JOIN lecturer l ON tl.lecturer_id = l.id
@@ -48,20 +49,24 @@ export async function getLecturerThesis(id: number): Promise<Thesis[]> {
    const [rows]: any = await pool.query(query);
    rows satisfies GetLecturerThesisQueryRow[];
 
+   return mapToThesis(rows) satisfies Thesis[];
+}
+
+const mapToThesis = (rows: GetLecturerThesisQueryRow[]) => {
    return rows.map((row: GetLecturerThesisQueryRow) => {
-      // JSON object bisa menjadi string atau object tergantung driver/versi dbms
-      const studentData: typeof row.student = typeof row.student === 'string' ? JSON.parse(row.student) : row.student;
-      const lecturersList: typeof row.lecturers = typeof row.lecturers === 'string' ? JSON.parse(row.lecturers) : (row.lecturers || []);
+
+      const { progress_status, lecturers, ...rest } = row;
 
       return {
-         id: row.id,
-         title: row.title || "Belum ada judul",
-         progress: (THESIS_STATUS_LABELS)[row.progress_status] || row.progress_status,
-         student: studentData,
-         lecturers: lecturersList.map((lec: typeof row.lecturers[0]) => ({
-            ...lec,
-            role: (LECTURER_ROLE_LABELS)[lec.role] || lec.role
-         })),
+         ...rest,
+         progress: progress_status,
+         lecturers: lecturers.map((lec) => {
+            const { is_admin, ...lecturerRest } = lec;
+            return {
+               ...lecturerRest,
+               isAdmin: is_admin
+            } satisfies Lecturer;
+         }),
       } satisfies Thesis;
    });
 }

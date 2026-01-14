@@ -12,17 +12,11 @@ export const eventTypes = [
 
 export type EventType = typeof eventTypes[number];
 
-/**
- * Mapping dari [@type {EventType}] ke definisi tipenya.
- */
-type EventMap = {
-  konsultasi: Konsultasi;
-  seminar_proposal: SeminarProposal;
-  seminar_hasil: SeminarHasil;
-  pendadaran: Pendadaran;
-};
+type WithType<T extends EventType> = { type: T };
 
-// Akan terjadi error jika ada EventType yang tidak semuanya dimapping di EventMap
-export type Event = {
-  [K in EventType]: EventMap[K] & { type: K };
-}[EventType];
+
+export type Event =
+  | Konsultasi & WithType<"konsultasi">
+  | SeminarProposal & WithType<"seminar_proposal">
+  | SeminarHasil & WithType<"seminar_hasil">
+  | Pendadaran & WithType<"pendadaran">;

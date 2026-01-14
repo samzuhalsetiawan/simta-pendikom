@@ -1,67 +1,39 @@
 import "server-only";
 
 import { pool } from "@/lib/db";
-import { EVENT_TYPE_LABELS, EventTypeRaw } from "@/types/event/event";
-import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/user/lecturer";
-import { THESIS_STATUS_LABELS, ThesisStatusRaw } from "@/types/thesis";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import sql from "sql-template-strings";
-import { Event } from "@/types/event/event"
+import { Event, EventType } from "@/types/event/event"
+import { ThesisStatus } from "@/types/thesis";
+import { Lecturer, LecturerRole } from "@/types/user/lecturer";
 
 type GetLecturerNeedApprovalQueryRow = {
-   raw_type: EventTypeRaw;
-   event_data:
-   // Konsultasi 
+   type: EventType;
+   event:
    {
       id: number;
       date: string;
       location: string;
-      topic: string | null;
+      topic?: string;
       thesis: {
          id: number;
-         title: string | null;
-         progress: ThesisStatusRaw;
+         title?: string;
+         progress: ThesisStatus;
          student: {
             id: number;
             nim: string;
             name: string;
-            email: string | null;
-            image: string | null;
+            email?: string;
+            image?: string;
          };
          lecturers: {
             id: number;
             nip: string;
             name: string;
-            email: string | null;
-            image: string | null;
-            role: LecturerRoleRaw;
-         }[];
-      };
-   } |
-   // Seminar Proposal, Seminar Hasil, Ujian Akhir
-   {
-      id: number;
-      date: string;
-      location: string;
-      topic: string | null;
-      thesis: {
-         id: number;
-         title: string | null;
-         progress: ThesisStatusRaw;
-         student: {
-            id: number;
-            nim: string;
-            name: string;
-            email: string | null;
-            image: string | null;
-         };
-         lecturers: {
-            id: number;
-            nip: string;
-            name: string;
-            email: string | null;
-            image: string | null;
-            role: LecturerRoleRaw;
+            email?: string;
+            image?: string;
+            is_admin: boolean;
+            role: LecturerRole;
          }[];
       };
    };
@@ -77,7 +49,7 @@ export async function getLecturerNeedApproval(id: number): Promise<Event[]> {
    const query = sql`
       -- BAGIAN KONSULTASI
       SELECT 
-        'consultation' AS raw_type,
+        'konsultasi' AS type,
         JSON_OBJECT(
           'id', c.id,
           'date', c.consultation_date,
@@ -93,7 +65,7 @@ export async function getLecturerNeedApproval(id: number): Promise<Event[]> {
             'lecturers', (
               SELECT JSON_ARRAYAGG(
                 JSON_OBJECT(
-                  'id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role
+                  'id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin
                 )
               )
               FROM thesis_lecturers tl
@@ -101,7 +73,7 @@ export async function getLecturerNeedApproval(id: number): Promise<Event[]> {
               WHERE tl.thesis_id = t.id
             )
           )
-        ) AS event_data,
+        ) AS event,
         c.consultation_date AS sort_date
       FROM consultations c
       JOIN thesis t ON c.thesis_id = t.id
@@ -112,7 +84,7 @@ export async function getLecturerNeedApproval(id: number): Promise<Event[]> {
 
       -- BAGIAN EVENTS (SEM_PROP, SEM_HASIL, UJIAN)
       SELECT 
-        e.type AS raw_type,
+        e.type AS event_type,
         JSON_OBJECT(
           'id', e.id,
           'date', e.event_date,
@@ -127,7 +99,7 @@ export async function getLecturerNeedApproval(id: number): Promise<Event[]> {
             'lecturers', (
               SELECT JSON_ARRAYAGG(
                 JSON_OBJECT(
-                  'id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role
+                  'id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin
                 )
               )
               FROM thesis_lecturers tl
@@ -135,7 +107,7 @@ export async function getLecturerNeedApproval(id: number): Promise<Event[]> {
               WHERE tl.thesis_id = t.id
             )
           )
-        ) AS event_data,
+        ) AS event,
         e.event_date AS sort_date
       FROM events e
       JOIN event_approvals ea ON e.id = ea.event_id
@@ -149,24 +121,27 @@ export async function getLecturerNeedApproval(id: number): Promise<Event[]> {
    const [rows]: any = await pool.query(query);
    rows satisfies GetLecturerNeedApprovalQueryRow[];
 
-   return rows.map((row: GetLecturerNeedApprovalQueryRow) => {
-      // JSON object bisa menjadi string atau object tergantung driver/versi dbms
-      const data: typeof row.event_data = typeof row.event_data === 'string' ? JSON.parse(row.event_data) : row.event_data;
-      const thesis = {
-         ...data.thesis,
-         progress: (THESIS_STATUS_LABELS)[data.thesis.progress] || data.thesis.progress,
-         lecturers: data.thesis.lecturers.map((lec: typeof data.thesis.lecturers[0]) => ({
-            ...lec,
-            role: (LECTURER_ROLE_LABELS)[lec.role] || lec.role
-         }))
-      };
-      const timezone = process.env.DB_TZ || "Asia/Makassar";
-      const date = toZonedTime(fromZonedTime(row.sort_date, timezone), timezone);
-      return {
-         type: (EVENT_TYPE_LABELS)[row.raw_type] || row.raw_type,
-         ...data,
-         date,
-         thesis,
-      } satisfies Event;
-   });
+   return mapToEvents(rows) satisfies Event[];
+}
+
+const mapToEvents = (rows: GetLecturerNeedApprovalQueryRow[]) => {
+  const timezone = process.env.DB_TZ || "Asia/Makassar";
+  return rows.map((row: GetLecturerNeedApprovalQueryRow) => {
+    const { sort_date: _, event, ...rest } = row;
+    return {
+      ...rest,
+      ...event,
+      thesis: {
+        ...event.thesis,
+        lecturers: event.thesis.lecturers.map((lecturer) => {
+          const { is_admin, ...lecturerRest } = lecturer;
+          return {
+            ...lecturerRest,
+            isAdmin: is_admin
+          } satisfies Lecturer;
+        }),
+      },
+      date: toZonedTime(fromZonedTime(event.date, timezone), timezone)
+    } satisfies Event;
+  });
 }

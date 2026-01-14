@@ -2,37 +2,38 @@ import "server-only";
 
 import { pool } from "@/lib/db";
 import { Event, EventType } from "@/types/event/event";
-import { LECTURER_ROLE_LABELS, LecturerRoleRaw } from "@/types/user/lecturer";
-import { Thesis, THESIS_STATUS_LABELS, ThesisStatusRaw } from "@/types/thesis";
 import { fromZonedTime, toZonedTime } from "date-fns-tz";
 import sql from "sql-template-strings";
+import { ThesisStatus } from "@/types/thesis";
+import { Lecturer, LecturerRole } from "@/types/user/lecturer";
 
 type GetStudentEventQueryRow = {
   id: number;
-  raw_type: EventType;
-  event_data: {
+  type: EventType;
+  event: {
     id: number;
     date: string;
     location: string;
-    topic: string | null;
+    topic?: string;
     thesis: {
       id: number;
-      title: string | null;
-      progress: ThesisStatusRaw;
+      title?: string;
+      progress: ThesisStatus;
       student: {
         id: number;
         nim: string;
         name: string;
-        email: string | null;
-        image: string | null;
+        email?: string;
+        image?: string;
       };
       lecturers: {
         id: number;
         nip: string;
         name: string;
-        email: string | null;
-        image: string | null;
-        role: LecturerRoleRaw;
+        email?: string;
+        image?: string;
+        is_admin: boolean;
+        role: LecturerRole;
       }[];
     };
   };
@@ -57,7 +58,7 @@ export async function getStudentEvent(
   // Query 1: Konsultasi Pribadi (Hanya milik studentId terkait)
   const query = sql`
       SELECT 
-         'consultation' AS raw_type,
+         'konsultasi' AS type,
          JSON_OBJECT(
             'id', c.id, 
             'date', c.consultation_date, 
@@ -73,7 +74,7 @@ export async function getStudentEvent(
                'lecturers', (
                   SELECT JSON_ARRAYAGG(
                      JSON_OBJECT(
-                        'id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role
+                        'id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin
                      )
                   )
                   FROM thesis_lecturers tl 
@@ -81,7 +82,7 @@ export async function getStudentEvent(
                   WHERE tl.thesis_id = t.id
                )
             )
-         ) AS event_data,
+         ) AS event,
          c.consultation_date AS sort_date
       FROM consultations c
       JOIN thesis t ON c.thesis_id = t.id
@@ -94,12 +95,11 @@ export async function getStudentEvent(
   query.append(sql` UNION ALL 
 
       SELECT 
-         e.type AS raw_type,
+         e.type AS type,
          JSON_OBJECT(
             'id', e.id, 
             'date', e.event_date, 
             'location', e.location,
-            'topic', NULL, -- Event tidak punya topic, set NULL agar struktur JSON konsisten
             'thesis', JSON_OBJECT(
                'id', t.id, 
                'title', t.title, 
@@ -110,7 +110,7 @@ export async function getStudentEvent(
                'lecturers', (
                   SELECT JSON_ARRAYAGG(
                      JSON_OBJECT(
-                        'id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role
+                        'id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin
                      )
                   )
                   FROM thesis_lecturers tl 
@@ -118,7 +118,7 @@ export async function getStudentEvent(
                   WHERE tl.thesis_id = t.id
                )
             )
-         ) AS event_data,
+         ) AS event,
          e.event_date AS sort_date
       FROM events e
       JOIN thesis t ON e.thesis_id = t.id
@@ -135,64 +135,27 @@ export async function getStudentEvent(
   // Validasi tipe raw sebelum mapping
   rows satisfies GetStudentEventQueryRow[];
 
-  return mapGetStudentEventRowsToEvents(rows);
+  return mapToEvents(rows) satisfies Event[];
 }
 
-function mapGetStudentEventRowsToEvents(
-  rows: GetStudentEventQueryRow[]
-): Event[] {
+const mapToEvents = (rows: GetStudentEventQueryRow[]) => {
+  const timezone = process.env.DB_TZ || "Asia/Makassar";
   return rows.map((row: GetStudentEventQueryRow) => {
-    // Parsing JSON dari database (MySQL driver mungkin mengembalikan string)
-    const data: typeof row.event_data =
-      typeof row.event_data === "string"
-        ? JSON.parse(row.event_data)
-        : row.event_data;
-
-    // Mapping Thesis: null -> undefined, Enum String -> Label
-    const thesis = {
-      ...data.thesis,
-      title: data.thesis.title || undefined, // nullish coalescing
-      progress:
-        THESIS_STATUS_LABELS[data.thesis.progress] || data.thesis.progress,
-      student: {
-        ...data.thesis.student,
-        email: data.thesis.student.email || undefined,
-        image: data.thesis.student.image || undefined,
-      },
-      lecturers: data.thesis.lecturers.map((lec) => ({
-        ...lec,
-        role: LECTURER_ROLE_LABELS[lec.role],
-        email: lec.email || undefined,
-        image: lec.image || undefined,
-        isAdmin: false,
-      })),
-    } satisfies Thesis;
-
-    // Handling Timezone
-    const timezone = process.env.DB_TZ || "Asia/Makassar";
-    const date = toZonedTime(fromZonedTime(row.sort_date, timezone), timezone);
-
-    const baseProps = {
-      id: data.id,
-      location: data.location,
-      date,
-      thesis,
-    };
-
-    // Return sesuai tipe Event yang spesifik
-    if (row.raw_type === "konsultasi") {
-      return {
-        type: row.raw_type,
-        ...baseProps,
-        // Jika topic ada isinya gunakan, jika null abaikan (undefined)
-        ...(data.topic ? { topic: data.topic } : {}),
-      } satisfies Event;
-    }
-
-    // Untuk Seminar Proposal, Hasil, dan Ujian Akhir
+    const { sort_date: _, event, ...rest } = row;
     return {
-      type: row.raw_type,
-      ...baseProps,
+      ...rest,
+      ...event,
+      thesis: {
+        ...event.thesis,
+        lecturers: event.thesis.lecturers.map((lecturer) => {
+          const { is_admin, ...lecturerRest } = lecturer;
+          return {
+            ...lecturerRest,
+            isAdmin: is_admin
+          } satisfies Lecturer;
+        }),
+      },
+      date: toZonedTime(fromZonedTime(event.date, timezone), timezone)
     } satisfies Event;
   });
 }

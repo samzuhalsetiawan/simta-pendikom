@@ -1,17 +1,14 @@
 "use client";
 
 import { format, addDays, startOfWeek, addWeeks, subWeeks, isSameDay, startOfMonth, endOfMonth, endOfWeek, eachDayOfInterval, isSameMonth, addMonths, subMonths } from "date-fns";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, ArrowRight, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Consultation, Event, EventType } from "@/types/event/event";
-import { on } from "events";
 import { useDaysInView } from "./hooks/days-in-view";
 import { EventCalendarBody } from "./components/body";
 import { Suspense, useState } from "react";
+import { Event } from "@/types/event/event";
 
 
 export const eventCalendarViews = ["day", "month", "week"] as const;

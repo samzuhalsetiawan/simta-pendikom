@@ -8,8 +8,8 @@ type GetLecturerByIdQueryRow = {
    id: number;
    nip: string;
    name: string;
-   email: string | null;
-   image: string | null;
+   email?: string;
+   image?: string;
    is_admin: boolean;
 };
 
@@ -23,13 +23,14 @@ export async function getLecturerById(id: number) {
    const [rows]: any = await pool.query(query);
    rows satisfies GetLecturerByIdQueryRow[];
    if (rows.length === 0) return;
-   const lecturer: GetLecturerByIdQueryRow = rows[0];
+   const row: GetLecturerByIdQueryRow = rows[0];
+   return mapToLecturer(row) satisfies Lecturer;
+}
+
+const mapToLecturer = (row: GetLecturerByIdQueryRow) => {
+   const { is_admin, ...rest } = row;
    return {
-      id: lecturer.id,
-      nip: lecturer.nip,
-      name: lecturer.name,
-      email: lecturer.email === null ? undefined : lecturer.email,
-      image: lecturer.image === null ? undefined : lecturer.image,
-      isAdmin: lecturer.is_admin,
+      ...rest,
+      isAdmin: is_admin
    } satisfies Lecturer;
 }
