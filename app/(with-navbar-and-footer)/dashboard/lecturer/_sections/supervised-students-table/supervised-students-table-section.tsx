@@ -2,12 +2,15 @@ import { Thesis } from "@/types/thesis";
 import { SupervisedStudentsTable } from "./components/supervised-students-table";
 
 type SupervisedStudentsTableSectionProps = {
-  studentsThesis: Thesis[];
+  studentsThesisPromise: Promise<Thesis[]>;
 };
 
-export function SupervisedStudentsTableSection({
-  studentsThesis,
+export async function SupervisedStudentsTableSection({
+  studentsThesisPromise,
 }: SupervisedStudentsTableSectionProps) {
+
+  const studentsThesis = await studentsThesisPromise
+  
   return (
     <section>
       <SupervisedStudentsTable studentsThesis={studentsThesis} />

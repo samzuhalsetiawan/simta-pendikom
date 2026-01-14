@@ -13,15 +13,16 @@ import {
 import { Event } from "@/types/event/event";
 import { format } from "date-fns";
 import { Calendar, ChevronDown, ChevronUp, Clock, MapPin } from "lucide-react";
-import { useState } from "react";
+import { use, useState } from "react";
 
 type ImportantSectionProps = {
-  pendingEventsApprovals: Event[];
+  needApprovalsPromise: Promise<Event[]>;
 };
 
 export function ImportantSection({
-  pendingEventsApprovals,
+  needApprovalsPromise,
 }: ImportantSectionProps) {
+  const needApprovals = use(needApprovalsPromise);
   const [isOpen, setIsOpen] = useState(true);
 
   return (
@@ -33,7 +34,7 @@ export function ImportantSection({
             variant="destructive"
             className="rounded-full px-2 py-0.5 text-xs"
           >
-            {pendingEventsApprovals.length}
+            {needApprovals.length}
           </Badge>
         </div>
         <Button
@@ -52,7 +53,7 @@ export function ImportantSection({
 
       {isOpen && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-          {pendingEventsApprovals.map((pendingApproval) => (
+          {needApprovals.map((pendingApproval) => (
             <Card
               key={pendingApproval.id}
               className="border-none shadow-sm bg-white dark:bg-zinc-900"

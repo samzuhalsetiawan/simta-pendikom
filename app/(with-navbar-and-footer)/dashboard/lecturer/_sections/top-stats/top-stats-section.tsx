@@ -6,15 +6,19 @@ import { Thesis } from "@/types/thesis";
 
 type TopStatsSectionProps = {
   lecturer: Lecturer;
-  supervisedStudentsThesis: Thesis[];
-  examinedStudentsThesis: Thesis[];
-};
+  supervisedStudentsThesisPromise: Promise<Thesis[]>;
+  examinedStudentsThesisPromise: Promise<Thesis[]>;
+}
 
-export function TopStatsSection({
+export async function TopStatsSection({
   lecturer,
-  supervisedStudentsThesis,
-  examinedStudentsThesis,
+  supervisedStudentsThesisPromise,
+  examinedStudentsThesisPromise
 }: TopStatsSectionProps) {
+
+  const supervisedStudentsThesis = await supervisedStudentsThesisPromise
+  const examinedStudentsThesis = await examinedStudentsThesisPromise
+  
   return (
     <section className="flex flex-col gap-2 items-center lg:items-stretch">
       <div className="flex flex-col gap-3 lg:flex-row lg:justify-center w-full">
