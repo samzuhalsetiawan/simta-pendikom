@@ -4,30 +4,26 @@ import { pool } from "@/lib/db";
 import { Lecturer } from "@/types/user/lecturer";
 import sql from "sql-template-strings";
 
-type GetLecturerByIdQueryRow = {
+type GetLecturersQueryRow = {
    id: number;
    nip: string;
    name: string;
    email?: string;
    image?: string;
-   is_admin: number;
+   is_admin: boolean;
 };
 
-export async function getLecturerById(id: number) {
+export async function getLecturers(): Promise<Lecturer[]> {
    const query = sql`
    SELECT id, nip, name, email, image, is_admin
    FROM lecturer 
-   WHERE id = ${id}
-   LIMIT 1
+   ORDER BY name ASC
  `;
    const [rows]: any = await pool.query(query);
-   rows satisfies GetLecturerByIdQueryRow[];
-   if (rows.length === 0) return;
-   const row: GetLecturerByIdQueryRow = rows[0];
-   return mapToLecturer(row) satisfies Lecturer;
+   return rows.map(mapToLecturer);
 }
 
-const mapToLecturer = (row: GetLecturerByIdQueryRow) => {
+const mapToLecturer = (row: GetLecturersQueryRow): Lecturer => {
    const { is_admin, ...rest } = row;
    return {
       ...rest,

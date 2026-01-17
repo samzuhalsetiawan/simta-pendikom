@@ -15,6 +15,7 @@ type GetLecturerThesisQueryRow = {
       name: string;
       email: string;
       image: string;
+      generation_year: number;
    };
    lecturers: {
       id: number;
@@ -22,7 +23,7 @@ type GetLecturerThesisQueryRow = {
       name: string;
       email: string;
       image: string;
-      is_admin: boolean;
+      is_admin: number;
       role: LecturerRole;
    }[];
 };
@@ -31,7 +32,7 @@ export async function getLecturerThesis(id: number): Promise<Thesis[]> {
    const query = sql`
       SELECT 
         t.id, t.title, t.progress_status,
-        JSON_OBJECT('id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image) AS student,
+        JSON_OBJECT('id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image, 'generation_year', s.generation_year) AS student,
         (
           SELECT JSON_ARRAYAGG(
             JSON_OBJECT('id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin)
@@ -55,16 +56,20 @@ export async function getLecturerThesis(id: number): Promise<Thesis[]> {
 const mapToThesis = (rows: GetLecturerThesisQueryRow[]) => {
    return rows.map((row: GetLecturerThesisQueryRow) => {
 
-      const { progress_status, lecturers, ...rest } = row;
+      const { progress_status, student, lecturers, ...rest } = row;
 
       return {
          ...rest,
          progress: progress_status,
+         student: {
+            ...student,
+            generationYear: student.generation_year
+         },
          lecturers: lecturers.map((lec) => {
             const { is_admin, ...lecturerRest } = lec;
             return {
                ...lecturerRest,
-               isAdmin: is_admin
+               isAdmin: !!is_admin
             } satisfies Lecturer;
          }),
       } satisfies Thesis;

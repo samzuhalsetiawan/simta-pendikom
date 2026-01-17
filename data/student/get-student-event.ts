@@ -25,6 +25,7 @@ type GetStudentEventQueryRow = {
         name: string;
         email?: string;
         image?: string;
+        generation_year: number;
       };
       lecturers: {
         id: number;
@@ -32,7 +33,7 @@ type GetStudentEventQueryRow = {
         name: string;
         email?: string;
         image?: string;
-        is_admin: boolean;
+        is_admin: number;
         role: LecturerRole;
       }[];
     };
@@ -105,7 +106,7 @@ export async function getStudentEvent(
                'title', t.title, 
                'progress', t.progress_status,
                'student', JSON_OBJECT(
-                  'id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image
+                  'id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image, 'generation_year', s.generation_year
                ),
                'lecturers', (
                   SELECT JSON_ARRAYAGG(
@@ -147,11 +148,15 @@ const mapToEvents = (rows: GetStudentEventQueryRow[]) => {
       ...event,
       thesis: {
         ...event.thesis,
+        student: {
+         ...event.thesis.student,
+         generationYear: event.thesis.student.generation_year
+        },
         lecturers: event.thesis.lecturers.map((lecturer) => {
           const { is_admin, ...lecturerRest } = lecturer;
           return {
             ...lecturerRest,
-            isAdmin: is_admin
+            isAdmin: !!is_admin
           } satisfies Lecturer;
         }),
       },

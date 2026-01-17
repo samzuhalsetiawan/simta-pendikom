@@ -19,23 +19,6 @@ export function ProfileCard({
    showAdminPageButton = false
 }: UserProfileProps) {
 
-   const getIdNumberText = () => {
-      switch (user.role) {
-         case "lecturer":
-            return `NIP. ${user.nip}`
-         case "student":
-            return `NIM. ${user.nim}`
-      }
-   }
-
-   const getRoleLabel = () => {
-      switch (user.role) {
-         case "lecturer":
-            return "Lecturer"
-         case "student":
-            return "Student"
-      }
-   }
 
    return (
       <Card className={cn(className)}>
@@ -46,11 +29,11 @@ export function ProfileCard({
             </Avatar>
             <div className="flex flex-col gap-1">
                <h3 className="font-semibold text-sm">{user.name}</h3>
-               <p className="text-xs text-muted-foreground">{getIdNumberText()}</p>
+               <p className="text-xs text-muted-foreground">{'nip' in user ? user.nip : user.nim}</p>
                <div className="flex items-center gap-1 mt-1">
                   <span className="inline-flex items-center justify-center rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
                      <Users className="w-3 h-3 mr-1" />
-                     {getRoleLabel()}
+                     {'nip' in user ? "Lecturer" : "Student"}
                   </span>
                </div>
                {showAdminPageButton ? <Button asChild className="mt-2 cursor-pointer" size={"sm"}>

@@ -4,4 +4,5 @@ export type Student = {
    name: string;
    email?: string;
    image?: string;
+   generationYear: number;
 }

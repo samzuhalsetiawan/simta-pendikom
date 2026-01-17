@@ -9,5 +9,5 @@ interface UserRoleMap {
 export type UserRole = keyof UserRoleMap;
 
 export type User = {
-   [K in UserRole]: UserRoleMap[K] & { role: K }
+   [K in UserRole]: UserRoleMap[K]
 }[UserRole]

@@ -10,6 +10,7 @@ type GetStudentByIdQueryRow = {
    name: string;
    email?: string;
    image?: string;
+   generation_year: number;
 }
 
 export async function getStudentById(id: string | number): Promise<Student | undefined> {
@@ -19,7 +20,8 @@ export async function getStudentById(id: string | number): Promise<Student | und
         nim, 
         name, 
         email, 
-        image 
+        image,
+        generation_year
       FROM student 
       WHERE id = ${id}
       LIMIT 1
@@ -33,8 +35,9 @@ export async function getStudentById(id: string | number): Promise<Student | und
 }
 
 const mapToStudent = (row: GetStudentByIdQueryRow) => {
-  const { ...rest } = row; 
+  const { generation_year, ...rest } = row; 
   return {
       ...rest,
+      generationYear: generation_year
    } satisfies Student;
 } 

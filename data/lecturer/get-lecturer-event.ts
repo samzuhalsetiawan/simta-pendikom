@@ -25,6 +25,7 @@ type GetLecturerEventQueryRow = {
         name: string;
         email?: string;
         image?: string;
+        generation_year: number;
       };
       lecturers: {
         id: number;
@@ -33,7 +34,7 @@ type GetLecturerEventQueryRow = {
         email?: string;
         image?: string;
         role: LecturerRole;
-        is_admin: boolean;
+        is_admin: number;
       }[];
     };
   };
@@ -56,7 +57,7 @@ export async function getLecturerEvent(
       SELECT 'konsultasi' AS type,
         JSON_OBJECT('id', c.id, 'date', c.consultation_date, 'location', c.location, 'topic', c.topic,
           'thesis', JSON_OBJECT('id', t.id, 'title', t.title, 'progress', t.progress_status,
-            'student', JSON_OBJECT('id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image),
+            'student', JSON_OBJECT('id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image, 'generation_year', s.generation_year),
             'lecturers', (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin))
               FROM thesis_lecturers tl JOIN lecturer l ON tl.lecturer_id = l.id WHERE tl.thesis_id = t.id))) AS event,
         c.consultation_date AS sort_date
@@ -74,7 +75,7 @@ export async function getLecturerEvent(
       SELECT e.type AS type,
         JSON_OBJECT('id', e.id, 'date', e.event_date, 'location', e.location,
           'thesis', JSON_OBJECT('id', t.id, 'title', t.title, 'progress', t.progress_status,
-            'student', JSON_OBJECT('id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image),
+            'student', JSON_OBJECT('id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image, 'generation_year', s.generation_year),
             'lecturers', (SELECT JSON_ARRAYAGG(JSON_OBJECT('id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin))
               FROM thesis_lecturers tl JOIN lecturer l ON tl.lecturer_id = l.id WHERE tl.thesis_id = t.id))) AS event,
         e.event_date AS sort_date
@@ -104,11 +105,15 @@ const mapToEvents = (rows: GetLecturerEventQueryRow[]) => {
       ...event,
       thesis: {
         ...event.thesis,
+        student: {
+          ...event.thesis.student,
+          generationYear: event.thesis.student.generation_year
+        },
         lecturers: event.thesis.lecturers.map((lecturer) => {
           const { is_admin, ...lecturerRest } = lecturer;
           return {
             ...lecturerRest,
-            isAdmin: is_admin
+            isAdmin: !!is_admin
           } satisfies Lecturer;
         }),
       },

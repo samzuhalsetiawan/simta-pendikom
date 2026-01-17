@@ -2,6 +2,9 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import * as React from "react"
 import { eachWeekOfInterval, endOfISOWeek, format, startOfISOWeek } from "date-fns"
+import { User, UserRole } from "@/types/user/user"
+import { Student } from "@/types/user/student"
+import { Lecturer } from "@/types/user/lecturer"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
