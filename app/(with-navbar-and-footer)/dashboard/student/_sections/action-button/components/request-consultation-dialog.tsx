@@ -7,25 +7,28 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar } from "lucide-react";
+import { Calendar, Loader2 } from "lucide-react";
+import { Examiner, Supervisor } from "@/types/user/lecturer";
 
 interface RequestConsultationDialogProps {
    open: boolean;
    onOpenChange: (open: boolean) => void;
-   supervisors: { id: number; name: string }[];
+   supervisors: (Supervisor | Examiner)[]; // Using supervisors prop name but accepts any lecturer
    onSubmit?: (data: {
       topic: string;
       datetime: string;
       location: string;
       supervisorId: number;
    }) => void;
+   isLoading?: boolean;
 }
 
 export function RequestConsultationDialog({
    open,
    onOpenChange,
    supervisors,
-   onSubmit
+   onSubmit,
+   isLoading = false
 }: RequestConsultationDialogProps) {
    const [topic, setTopic] = useState("");
    const [datetime, setDatetime] = useState("");
@@ -41,16 +44,12 @@ export function RequestConsultationDialog({
             location,
             supervisorId: parseInt(supervisorId)
          });
-         // Reset form
-         setTopic("");
-         setDatetime("");
-         setLocation("");
-         setSupervisorId("");
-         onOpenChange(false);
+         // Don't reset form here, wait for success or close to reset
       }
    };
 
    const handleCancel = () => {
+      // Reset only on cancel/close, not submit
       setTopic("");
       setDatetime("");
       setLocation("");
@@ -59,7 +58,7 @@ export function RequestConsultationDialog({
    };
 
    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={(open) => !isLoading && onOpenChange(open)}>
          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
                <DialogTitle className="flex items-center gap-2">
@@ -67,21 +66,21 @@ export function RequestConsultationDialog({
                   Request Konsultasi
                </DialogTitle>
                <DialogDescription>
-                  Ajukan permintaan konsultasi dengan dosen pembimbing Anda
+                  Ajukan permintaan konsultasi dengan dosen Anda
                </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
                <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                     <Label htmlFor="supervisor">Dosen Pembimbing <span className="text-red-500">*</span></Label>
-                     <Select value={supervisorId} onValueChange={setSupervisorId} required>
+                     <Label htmlFor="supervisor">Dosen <span className="text-red-500">*</span></Label>
+                     <Select value={supervisorId} onValueChange={setSupervisorId} required disabled={isLoading}>
                         <SelectTrigger id="supervisor">
-                           <SelectValue placeholder="Pilih dosen pembimbing" />
+                           <SelectValue placeholder="Pilih dosen" />
                         </SelectTrigger>
                         <SelectContent>
                            {supervisors.map((supervisor) => (
                               <SelectItem key={supervisor.id} value={supervisor.id.toString()}>
-                                 {supervisor.name}
+                                 {supervisor.name} ({supervisor.role === 'pembimbing' ? 'Pembimbing' : 'Penguji'})
                               </SelectItem>
                            ))}
                         </SelectContent>
@@ -97,6 +96,7 @@ export function RequestConsultationDialog({
                         placeholder="Jelaskan topik yang ingin dikonsultasikan..."
                         className="min-h-[100px]"
                         required
+                        disabled={isLoading}
                      />
                   </div>
 
@@ -108,6 +108,7 @@ export function RequestConsultationDialog({
                         value={datetime}
                         onChange={(e) => setDatetime(e.target.value)}
                         required
+                        disabled={isLoading}
                      />
                   </div>
 
@@ -119,15 +120,17 @@ export function RequestConsultationDialog({
                         onChange={(e) => setLocation(e.target.value)}
                         placeholder="Ruang Lab, Zoom, dll."
                         required
+                        disabled={isLoading}
                      />
                   </div>
                </div>
 
                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={handleCancel}>
+                  <Button type="button" variant="outline" onClick={handleCancel} disabled={isLoading}>
                      Batal
                   </Button>
-                  <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                  <Button type="submit" className="bg-green-600 hover:bg-green-700" disabled={isLoading}>
+                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                      Kirim Request
                   </Button>
                </DialogFooter>

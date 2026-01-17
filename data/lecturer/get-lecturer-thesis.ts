@@ -24,6 +24,7 @@ type GetLecturerThesisQueryRow = {
       email: string;
       image: string;
       is_admin: number;
+      is_main: number;
       role: LecturerRole;
    }[];
 };
@@ -35,7 +36,7 @@ export async function getLecturerThesis(id: number): Promise<Thesis[]> {
         JSON_OBJECT('id', s.id, 'nim', s.nim, 'name', s.name, 'email', s.email, 'image', s.image, 'generation_year', s.generation_year) AS student,
         (
           SELECT JSON_ARRAYAGG(
-            JSON_OBJECT('id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin)
+            JSON_OBJECT('id', l.id, 'nip', l.nip, 'name', l.name, 'email', l.email, 'image', l.image, 'role', tl.role, 'is_admin', l.is_admin, 'is_main', tl.is_main)
           )
           FROM thesis_lecturers tl
           JOIN lecturer l ON tl.lecturer_id = l.id
@@ -66,11 +67,12 @@ const mapToThesis = (rows: GetLecturerThesisQueryRow[]) => {
             generationYear: student.generation_year
          },
          lecturers: lecturers.map((lec) => {
-            const { is_admin, ...lecturerRest } = lec;
+            const { is_admin, is_main, ...lecturerRest } = lec;
             return {
                ...lecturerRest,
-               isAdmin: !!is_admin
-            } satisfies Lecturer;
+               isAdmin: !!is_admin,
+               isMain: !!is_main
+            };
          }),
       } satisfies Thesis;
    });

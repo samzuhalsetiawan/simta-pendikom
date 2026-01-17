@@ -2,26 +2,46 @@
 
 import { Button } from "@/components/ui/button"
 import { MessageSquare } from "lucide-react"
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { RequestConsultationDialog } from "./request-consultation-dialog";
-import { Supervisor } from "@/types/user/lecturer";
+import { Supervisor, Examiner } from "@/types/user/lecturer";
+import { requestConsultationAction } from "@/actions/request-consultation";
+import { toast } from "sonner";
 
-const DUMMY_SUPERVISORS: Supervisor[] = [
-   { id: 1, name: "Dr. Ahmad Fauzi, M.Kom", nip: "198505152010121001", role: "Pembimbing" as const, image: "/avatars/default.png" },
-   { id: 2, name: "Dr. Siti Rahmawati, M.T", nip: "198703202012122002", role: "Pembimbing" as const },
-];
+interface ConsultationButtonProps {
+   lecturers: (Supervisor | Examiner)[];
+}
 
-export function ConsultationButton() {
+export function ConsultationButton({ lecturers }: ConsultationButtonProps) {
    const [consultationDialogOpen, setConsultationDialogOpen] = useState(false);
+   const [isPending, startTransition] = useTransition();
 
-   const handleConsultationSubmit = (data: any) => {
-      console.log("Consultation request:", data);
-      // In real implementation, this would call an API
+   const handleConsultationSubmit = (data: {
+      topic: string;
+      datetime: string;
+      location: string;
+      supervisorId: number; // Keep name as supervisorId in dialog for compatibility, but it refers to any lecturer
+   }) => {
+      startTransition(async () => {
+         const result = await requestConsultationAction(undefined, {
+            lecturerId: data.supervisorId,
+            datetime: data.datetime,
+            location: data.location,
+            topic: data.topic
+         });
+
+         if (result.success) {
+            toast.success(result.message);
+            setConsultationDialogOpen(false);
+         } else {
+            toast.error(result.message);
+         }
+      });
    };
 
    return (
       <>
-         <Button 
+         <Button
             size="lg"
             onClick={() => setConsultationDialogOpen(true)}
             className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white shadow-lg hover:shadow-xl transition-all"
@@ -34,8 +54,9 @@ export function ConsultationButton() {
          <RequestConsultationDialog
             open={consultationDialogOpen}
             onOpenChange={setConsultationDialogOpen}
-            supervisors={DUMMY_SUPERVISORS}
+            supervisors={lecturers}
             onSubmit={handleConsultationSubmit}
+            isLoading={isPending}
          />
       </>
    )

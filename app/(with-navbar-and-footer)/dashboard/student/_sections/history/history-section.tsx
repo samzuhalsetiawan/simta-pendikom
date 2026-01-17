@@ -1,67 +1,87 @@
+import { getStudentConsultations } from "@/data/student/get-student-consultations";
+import { getStudentHistory } from "@/data/student/get-student-history";
 import { ConsultationHistory, ExamHistory, HistoryTabs, SeminarHistory } from "./components/history-tabs";
+import { thesisStatus } from "@/types/thesis";
 
-const DUMMY_CONSULTATIONS: ConsultationHistory[] = [
-   {
-      id: 1,
-      date: new Date(2024, 11, 15, 10, 0),
-      location: "Ruang Dosen Lt. 3",
-      lecturer: "Dr. Ahmad Fauzi, M.Kom",
-      progress: "Penelitian",
-      topic: "Diskusi tentang hasil eksperimen machine learning dan analisis confusion matrix"
-   },
-   {
-      id: 2,
-      date: new Date(2024, 11, 8, 14, 30),
-      location: "Zoom Meeting",
-      lecturer: "Dr. Siti Rahmawati, M.T",
-      progress: "Penelitian",
-      topic: "Review dataset dan preprocessing data cuaca"
-   },
-   {
-      id: 3,
-      date: new Date(2024, 10, 25, 9, 0),
-      location: "Lab Komputer",
-      lecturer: "Dr. Ahmad Fauzi, M.Kom",
-      progress: "Seminar Proposal",
-      topic: null
-   },
-];
+type HistorySectionProps = {
+   studentId: number;
+}
 
-const DUMMY_SEMINAR_PROPOSALS: SeminarHistory[] = [
-   {
-      id: 1,
-      type: "proposal",
-      date: new Date(2024, 9, 20, 9, 0),
-      location: "Ruang Seminar A",
-      supervisors: ["Dr. Ahmad Fauzi, M.Kom", "Dr. Siti Rahmawati, M.T"],
-      examiners: ["Prof. Dr. Budi Santoso, M.Sc", "Dr. Eng. Maya Kusuma, S.T., M.T"],
-      attendees: [
-         "Andi Wijaya (2005176041)",
-         "Budi Prakoso (2005176042)",
-         "Citra Dewi (2005176043)",
-         "Dian Permata (2005176044)",
-         "Eko Saputra (2005176045)",
-         "Fitri Handayani (2005176046)",
-         "Gita Purnama (2005176047)",
-         "Hendra Gunawan (2005176048)",
-      ],
-      attendeeCount: 8,
-      status: "lulus"
-   },
-];
+// Map thesis status to readable format
+const statusLabels: Record<string, string> = {
+   pengajuan_proposal: "Pengajuan Proposal",
+   seminar_proposal: "Seminar Proposal",
+   penelitian: "Penelitian",
+   seminar_hasil: "Seminar Hasil",
+   pendadaran: "Pendadaran",
+   lulus: "Lulus",
+};
 
-const DUMMY_SEMINAR_HASILS: SeminarHistory[] = [];
+export async function HistorySection({ studentId }: HistorySectionProps) {
+   const [consultations, events] = await Promise.all([
+      getStudentConsultations(studentId),
+      getStudentHistory(studentId),
+   ]);
 
-const DUMMY_EXAMS: ExamHistory[] = [];
+   // Map consultations to history format
+   const consultationHistory: ConsultationHistory[] = consultations.map((c) => ({
+      id: c.id,
+      date: c.date,
+      location: c.location,
+      lecturer: c.lecturer.name,
+      progress: statusLabels[c.thesis.progress] ?? c.thesis.progress,
+      topic: c.topic,
+      status: c.status,
+      lecturerNote: c.lecturerNote,
+   }));
 
-export function HistorySection() {
+   // Separate events by type
+   const seminarProposals: SeminarHistory[] = events
+      .filter((e) => e.type === "seminar_proposal")
+      .map((e) => ({
+         id: e.id,
+         type: "proposal" as const,
+         date: e.date,
+         location: e.location,
+         supervisors: e.thesis.lecturers.filter((l) => l.role === "pembimbing").map((l) => l.name),
+         examiners: e.thesis.lecturers.filter((l) => l.role === "penguji").map((l) => l.name),
+         attendees: [],
+         attendeeCount: 0,
+         status: "lulus" as const, // TODO: Get actual pass status from event
+      }));
+
+   const seminarHasils: SeminarHistory[] = events
+      .filter((e) => e.type === "seminar_hasil")
+      .map((e) => ({
+         id: e.id,
+         type: "hasil" as const,
+         date: e.date,
+         location: e.location,
+         supervisors: e.thesis.lecturers.filter((l) => l.role === "pembimbing").map((l) => l.name),
+         examiners: e.thesis.lecturers.filter((l) => l.role === "penguji").map((l) => l.name),
+         attendees: [],
+         attendeeCount: 0,
+         status: "lulus" as const,
+      }));
+
+   const exams: ExamHistory[] = events
+      .filter((e) => e.type === "pendadaran")
+      .map((e) => ({
+         id: e.id,
+         date: e.date,
+         location: e.location,
+         supervisors: e.thesis.lecturers.filter((l) => l.role === "pembimbing").map((l) => l.name),
+         examiners: e.thesis.lecturers.filter((l) => l.role === "penguji").map((l) => l.name),
+         status: "lulus" as const,
+      }));
+
    return (
       <section className="mb-4">
          <HistoryTabs
-            consultations={DUMMY_CONSULTATIONS}
-            seminarProposals={DUMMY_SEMINAR_PROPOSALS}
-            seminarHasils={DUMMY_SEMINAR_HASILS}
-            exams={DUMMY_EXAMS}
+            consultations={consultationHistory}
+            seminarProposals={seminarProposals}
+            seminarHasils={seminarHasils}
+            exams={exams}
          />
       </section>
    )

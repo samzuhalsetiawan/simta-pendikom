@@ -9,13 +9,13 @@ export type Lecturer = {
 
 type WithRole<R extends LecturerRole> = { role: R }
 
-export type Supervisor = Lecturer & WithRole<"pembimbing">;
+export type Supervisor = Lecturer & WithRole<"pembimbing"> & { isMain?: boolean };
 
 export type Examiner = Lecturer & WithRole<"penguji">;
 
 export const lecturerRoles = [
    "pembimbing",
    "penguji",
- ] as const;
+] as const;
 
 export type LecturerRole = typeof lecturerRoles[number];

@@ -14,6 +14,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Thesis, ThesisStatus } from "@/types/thesis";
 import { useMemo, useState } from "react";
+import { ProgressChangeDialog } from "./progress-change-dialog";
 
 const getStatusColor = (status: ThesisStatus) => {
   switch (status) {
@@ -46,13 +47,17 @@ const statusWeights: Record<ThesisStatus, number> = {
 
 interface SupervisedStudentsTableProps {
   studentsThesis: Thesis[];
+  lecturerId: number;
 }
 
 export function SupervisedStudentsTable({
   studentsThesis,
+  lecturerId,
 }: SupervisedStudentsTableProps) {
   const [sortOption, setSorOption] = useState<SortOption>("name");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const sortedStudentsThesis = useMemo(() => {
     return [...studentsThesis].sort((a, b) => {
@@ -104,6 +109,20 @@ export function SupervisedStudentsTable({
     ) : (
       <ChevronDown className="h-3 w-3" />
     );
+  };
+
+  const isMainSupervisor = (thesis: Thesis) => {
+    const supervisor = thesis.lecturers.find(
+      (lec) => lec.id === lecturerId && lec.role === "pembimbing"
+    );
+    return supervisor && "isMain" in supervisor && supervisor.isMain;
+  };
+
+  const handleBadgeClick = (thesis: Thesis) => {
+    if (isMainSupervisor(thesis)) {
+      setSelectedThesis(thesis);
+      setIsDialogOpen(true);
+    }
   };
 
   return (
@@ -169,59 +188,76 @@ export function SupervisedStudentsTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {sortedStudentsThesis.map((studentThesis) => (
-              <TableRow
-                key={studentThesis.id}
-                className="border-b border-border/50 hover:bg-muted/50"
-              >
-                <TableCell className="font-medium">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage
-                        src={studentThesis.student.image}
-                        alt={studentThesis.student.name}
-                      />
-                      <AvatarFallback>
-                        {studentThesis.student.name.substring(0, 2)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm">
-                      {studentThesis.student.name}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell
-                  className="max-w-[300px] truncate text-muted-foreground text-xs"
-                  title={
-                    studentThesis.title === null
-                      ? undefined
-                      : studentThesis.title
-                  }
+            {sortedStudentsThesis.map((studentThesis) => {
+              const canEdit = isMainSupervisor(studentThesis);
+              return (
+                <TableRow
+                  key={studentThesis.id}
+                  className="border-b border-border/50 hover:bg-muted/50"
                 >
-                  {studentThesis.title}
-                </TableCell>
-                <TableCell>
-                  <Badge
-                    variant="secondary"
-                    className={cn(
-                      "font-medium border-0",
-                      getStatusColor(studentThesis.progress)
-                    )}
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage
+                          src={studentThesis.student.image}
+                          alt={studentThesis.student.name}
+                        />
+                        <AvatarFallback>
+                          {studentThesis.student.name.substring(0, 2)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm">
+                        {studentThesis.student.name}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell
+                    className="max-w-[300px] truncate text-muted-foreground text-xs"
+                    title={
+                      studentThesis.title === null
+                        ? undefined
+                        : studentThesis.title
+                    }
                   >
-                    {studentThesis.progress.replaceAll("_", " ")}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-sm">
-                  {0 /* Placeholder, as consultations data is not available */}
-                </TableCell>
-                <TableCell className="text-right text-sm">
-                  {"-" /* Placeholder, as update data is not available */}
-                </TableCell>
-              </TableRow>
-            ))}
+                    {studentThesis.title}
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="secondary"
+                      className={cn(
+                        "font-medium border-0",
+                        getStatusColor(studentThesis.progress),
+                        canEdit && "cursor-pointer hover:ring-2 hover:ring-primary/50"
+                      )}
+                      onClick={() => handleBadgeClick(studentThesis)}
+                    >
+                      {studentThesis.progress.replaceAll("_", " ")}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {0 /* Placeholder, as consultations data is not available */}
+                  </TableCell>
+                  <TableCell className="text-right text-sm">
+                    {"-" /* Placeholder, as update data is not available */}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
+
+      {/* Progress Change Dialog */}
+      {selectedThesis && (
+        <ProgressChangeDialog
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          thesisId={selectedThesis.id}
+          studentName={selectedThesis.student.name}
+          currentProgress={selectedThesis.progress}
+        />
+      )}
     </div>
   );
 }
+

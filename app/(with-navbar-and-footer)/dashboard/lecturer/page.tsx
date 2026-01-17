@@ -27,7 +27,7 @@ export default async function Page() {
   const needApprovalsPromise = getLecturerNeedApproval(lecturer.id);
   const lecturerEventsPromise = getLecturerEvent(lecturer.id);
   const lecturerStudentsThesisPromise = getLecturerThesis(lecturer.id);
-  
+
   const supervisedStudentsThesisPromise = new Promise<Thesis[]>(async (resolve, reject) => {
     const lecturerStudentsThesis = await lecturerStudentsThesisPromise
     const supervisedStudentsThesis = lecturerStudentsThesis.filter(thesis => {
@@ -37,7 +37,7 @@ export default async function Page() {
     })
     resolve(supervisedStudentsThesis)
   })
-  
+
   const examinedStudentsThesisPromise = new Promise<Thesis[]>(async (resolve, reject) => {
     const lecturerStudentsThesis = await lecturerStudentsThesisPromise
     const examinedStudentsThesis = lecturerStudentsThesis.filter(thesis => {
@@ -57,8 +57,8 @@ export default async function Page() {
           lecturer={lecturer}
           supervisedStudentsThesisPromise={supervisedStudentsThesisPromise}
           examinedStudentsThesisPromise={examinedStudentsThesisPromise}
-          />
-        </Suspense>
+        />
+      </Suspense>
 
       {/* Important Section */}
       <Suspense fallback={<div>loading...</div>}>
@@ -67,7 +67,7 @@ export default async function Page() {
 
       {/* Mentoring Table */}
       <Suspense fallback={<div>loading...</div>}>
-        <SupervisedStudentsTableSection studentsThesisPromise={supervisedStudentsThesisPromise} />
+        <SupervisedStudentsTableSection studentsThesisPromise={supervisedStudentsThesisPromise} lecturerId={lecturer.id} />
       </Suspense>
 
       {/* Exam Table */}

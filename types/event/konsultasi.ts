@@ -1,4 +1,5 @@
 import { Thesis } from "@/types/thesis";
+import { Examiner, Supervisor } from "@/types/user/lecturer";
 
 export type Konsultasi = {
    id: number;
@@ -6,4 +7,7 @@ export type Konsultasi = {
    date: Date;
    location: string;
    topic?: string;
+   status: "pending" | "accepted" | "rejected";
+   lecturerNote?: string;
+   lecturer: Supervisor | Examiner;
 }
