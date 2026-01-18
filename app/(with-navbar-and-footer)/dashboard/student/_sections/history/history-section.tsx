@@ -46,8 +46,9 @@ export async function HistorySection({ studentId }: HistorySectionProps) {
          supervisors: e.thesis.lecturers.filter((l) => l.role === "pembimbing").map((l) => l.name),
          examiners: e.thesis.lecturers.filter((l) => l.role === "penguji").map((l) => l.name),
          attendees: [],
-         attendeeCount: 0,
-         status: "lulus" as const, // TODO: Get actual pass status from event
+         attendeeCount: (e as any).attendeeCount ?? 0,
+         requestStatus: (e as any).requestStatus ?? "requested",
+         passStatus: (e as any).passStatus ?? "pending",
       }));
 
    const seminarHasils: SeminarHistory[] = events
@@ -60,8 +61,9 @@ export async function HistorySection({ studentId }: HistorySectionProps) {
          supervisors: e.thesis.lecturers.filter((l) => l.role === "pembimbing").map((l) => l.name),
          examiners: e.thesis.lecturers.filter((l) => l.role === "penguji").map((l) => l.name),
          attendees: [],
-         attendeeCount: 0,
-         status: "lulus" as const,
+         attendeeCount: (e as any).attendeeCount ?? 0,
+         requestStatus: (e as any).requestStatus ?? "requested",
+         passStatus: (e as any).passStatus ?? "pending",
       }));
 
    const exams: ExamHistory[] = events
@@ -72,7 +74,8 @@ export async function HistorySection({ studentId }: HistorySectionProps) {
          location: e.location,
          supervisors: e.thesis.lecturers.filter((l) => l.role === "pembimbing").map((l) => l.name),
          examiners: e.thesis.lecturers.filter((l) => l.role === "penguji").map((l) => l.name),
-         status: "lulus" as const,
+         requestStatus: (e as any).requestStatus ?? "requested",
+         passStatus: (e as any).passStatus ?? "pending",
       }));
 
    return (

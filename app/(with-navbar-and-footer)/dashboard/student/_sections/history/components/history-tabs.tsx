@@ -16,6 +16,8 @@ export interface ConsultationHistory {
    lecturer: string;
    progress: string;
    topic?: string | null;
+   status: "pending" | "accepted" | "rejected";
+   lecturerNote?: string;
 }
 
 export interface SeminarHistory {
@@ -27,7 +29,8 @@ export interface SeminarHistory {
    examiners: string[];
    attendees?: string[];
    attendeeCount: number;
-   status: "lulus" | "gagal";
+   requestStatus: "requested" | "approved" | "rejected";
+   passStatus: "pending" | "pass" | "fail";
 }
 
 export interface ExamHistory {
@@ -36,7 +39,8 @@ export interface ExamHistory {
    location: string;
    supervisors: string[];
    examiners: string[];
-   status: "lulus" | "gagal";
+   requestStatus: "requested" | "approved" | "rejected";
+   passStatus: "pending" | "pass" | "fail";
 }
 
 interface HistoryTabsProps {
@@ -175,20 +179,35 @@ export function HistoryTabs({ consultations, seminarProposals, seminarHasils, ex
                                              <span>{seminar.attendeeCount} penonton</span>
                                           </div>
                                        </div>
-                                       <Badge
-                                          className={cn(
-                                             "shrink-0",
-                                             seminar.status === "lulus"
-                                                ? "bg-green-600 hover:bg-green-700 text-white"
-                                                : "bg-red-600 hover:bg-red-700 text-white"
+                                       <div className="flex flex-col items-end gap-1">
+                                          <Badge
+                                             className={cn(
+                                                "shrink-0",
+                                                seminar.requestStatus === "approved" ? "bg-blue-600" :
+                                                   seminar.requestStatus === "rejected" ? "bg-gray-500" :
+                                                      "bg-yellow-500"
+                                             )}
+                                          >
+                                             {seminar.requestStatus === "approved" ? "Disetujui" :
+                                                seminar.requestStatus === "rejected" ? "Ditolak" : "Menunggu"}
+                                          </Badge>
+                                          {seminar.requestStatus === "approved" && (
+                                             <Badge
+                                                className={cn(
+                                                   "shrink-0",
+                                                   seminar.passStatus === "pass" ? "bg-green-600" :
+                                                      seminar.passStatus === "fail" ? "bg-red-600" :
+                                                         "bg-gray-400"
+                                                )}
+                                             >
+                                                {seminar.passStatus === "pass" ? (
+                                                   <><CheckCircle className="w-3 h-3 mr-1" /> Lulus</>
+                                                ) : seminar.passStatus === "fail" ? (
+                                                   <><XCircle className="w-3 h-3 mr-1" /> Gagal</>
+                                                ) : "Menunggu Hasil"}
+                                             </Badge>
                                           )}
-                                       >
-                                          {seminar.status === "lulus" ? (
-                                             <><CheckCircle className="w-3 h-3 mr-1" /> Lulus</>
-                                          ) : (
-                                             <><XCircle className="w-3 h-3 mr-1" /> Gagal</>
-                                          )}
-                                       </Badge>
+                                       </div>
                                     </div>
                                  </div>
                               ))}
@@ -227,20 +246,35 @@ export function HistoryTabs({ consultations, seminarProposals, seminarHasils, ex
                                              <span>{seminar.attendeeCount} penonton</span>
                                           </div>
                                        </div>
-                                       <Badge
-                                          className={cn(
-                                             "shrink-0",
-                                             seminar.status === "lulus"
-                                                ? "bg-green-600 hover:bg-green-700 text-white"
-                                                : "bg-red-600 hover:bg-red-700 text-white"
+                                       <div className="flex flex-col items-end gap-1">
+                                          <Badge
+                                             className={cn(
+                                                "shrink-0",
+                                                seminar.requestStatus === "approved" ? "bg-blue-600" :
+                                                   seminar.requestStatus === "rejected" ? "bg-gray-500" :
+                                                      "bg-yellow-500"
+                                             )}
+                                          >
+                                             {seminar.requestStatus === "approved" ? "Disetujui" :
+                                                seminar.requestStatus === "rejected" ? "Ditolak" : "Menunggu"}
+                                          </Badge>
+                                          {seminar.requestStatus === "approved" && (
+                                             <Badge
+                                                className={cn(
+                                                   "shrink-0",
+                                                   seminar.passStatus === "pass" ? "bg-green-600" :
+                                                      seminar.passStatus === "fail" ? "bg-red-600" :
+                                                         "bg-gray-400"
+                                                )}
+                                             >
+                                                {seminar.passStatus === "pass" ? (
+                                                   <><CheckCircle className="w-3 h-3 mr-1" /> Lulus</>
+                                                ) : seminar.passStatus === "fail" ? (
+                                                   <><XCircle className="w-3 h-3 mr-1" /> Gagal</>
+                                                ) : "Menunggu Hasil"}
+                                             </Badge>
                                           )}
-                                       >
-                                          {seminar.status === "lulus" ? (
-                                             <><CheckCircle className="w-3 h-3 mr-1" /> Lulus</>
-                                          ) : (
-                                             <><XCircle className="w-3 h-3 mr-1" /> Gagal</>
-                                          )}
-                                       </Badge>
+                                       </div>
                                     </div>
                                  </div>
                               ))}
@@ -282,20 +316,35 @@ export function HistoryTabs({ consultations, seminarProposals, seminarHasils, ex
                                              <div className="text-sm">{exam.examiners.join(", ")}</div>
                                           </div>
                                        </div>
-                                       <Badge
-                                          className={cn(
-                                             "shrink-0",
-                                             exam.status === "lulus"
-                                                ? "bg-green-600 hover:bg-green-700 text-white"
-                                                : "bg-red-600 hover:bg-red-700 text-white"
+                                       <div className="flex flex-col items-end gap-1">
+                                          <Badge
+                                             className={cn(
+                                                "shrink-0",
+                                                exam.requestStatus === "approved" ? "bg-blue-600" :
+                                                   exam.requestStatus === "rejected" ? "bg-gray-500" :
+                                                      "bg-yellow-500"
+                                             )}
+                                          >
+                                             {exam.requestStatus === "approved" ? "Disetujui" :
+                                                exam.requestStatus === "rejected" ? "Ditolak" : "Menunggu"}
+                                          </Badge>
+                                          {exam.requestStatus === "approved" && (
+                                             <Badge
+                                                className={cn(
+                                                   "shrink-0",
+                                                   exam.passStatus === "pass" ? "bg-green-600" :
+                                                      exam.passStatus === "fail" ? "bg-red-600" :
+                                                         "bg-gray-400"
+                                                )}
+                                             >
+                                                {exam.passStatus === "pass" ? (
+                                                   <><CheckCircle className="w-3 h-3 mr-1" /> Lulus</>
+                                                ) : exam.passStatus === "fail" ? (
+                                                   <><XCircle className="w-3 h-3 mr-1" /> Gagal</>
+                                                ) : "Menunggu Hasil"}
+                                             </Badge>
                                           )}
-                                       >
-                                          {exam.status === "lulus" ? (
-                                             <><CheckCircle className="w-3 h-3 mr-1" /> Lulus</>
-                                          ) : (
-                                             <><XCircle className="w-3 h-3 mr-1" /> Gagal</>
-                                          )}
-                                       </Badge>
+                                       </div>
                                     </div>
                                  </div>
                               ))}

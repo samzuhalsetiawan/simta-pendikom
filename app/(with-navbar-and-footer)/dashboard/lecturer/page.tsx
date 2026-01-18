@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Thesis } from "@/types/thesis";
 import { getLecturerById } from "@/data/lecturer/get-lecturer-by-id";
 import { getLecturerNeedApproval } from "@/data/lecturer/get-lecturer-need-approval";
+import { getLecturerPassConfirmations } from "@/data/lecturer/get-lecturer-pass-confirmations";
 import { getLecturerThesis } from "@/data/lecturer/get-lecturer-thesis";
 import { TopStatsSection } from "./_sections/top-stats/top-stats-section";
 import { ImportantSection } from "./_sections/important/important-section";
@@ -25,6 +26,7 @@ export default async function Page() {
   }
 
   const needApprovalsPromise = getLecturerNeedApproval(lecturer.id);
+  const passConfirmationsPromise = getLecturerPassConfirmations(lecturer.id);
   const lecturerEventsPromise = getLecturerEvent(lecturer.id);
   const lecturerStudentsThesisPromise = getLecturerThesis(lecturer.id);
 
@@ -62,7 +64,10 @@ export default async function Page() {
 
       {/* Important Section */}
       <Suspense fallback={<div>loading...</div>}>
-        <ImportantSection needApprovalsPromise={needApprovalsPromise} />
+        <ImportantSection
+          needApprovalsPromise={needApprovalsPromise}
+          passConfirmationsPromise={passConfirmationsPromise}
+        />
       </Suspense>
 
       {/* Mentoring Table */}

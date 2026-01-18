@@ -12,6 +12,7 @@ type GetStudentHistoryQueryRow = {
    type: Exclude<EventType, "konsultasi">;
    event_date: string;
    location: string;
+   request_status: "requested" | "approved" | "rejected";
    pass_status: "pending" | "pass" | "fail";
    thesis: {
       id: number;
@@ -39,7 +40,7 @@ type GetStudentHistoryQueryRow = {
 };
 
 /**
- * Fetch seminar and pendadaran history for a student (completed events)
+ * Fetch all seminar and pendadaran events for a student (all statuses)
  * @param studentId ID of the student
  */
 export async function getStudentHistory(studentId: number): Promise<Event[]> {
@@ -49,6 +50,7 @@ export async function getStudentHistory(studentId: number): Promise<Event[]> {
          e.type,
          e.event_date,
          e.location,
+         e.request_status,
          e.pass_status,
          JSON_OBJECT(
             'id', t.id, 
@@ -72,7 +74,7 @@ export async function getStudentHistory(studentId: number): Promise<Event[]> {
       FROM events e
       JOIN thesis t ON e.thesis_id = t.id
       JOIN student s ON t.student_id = s.id
-      WHERE s.id = ${studentId} AND e.pass_status IN ('pass', 'fail')
+      WHERE s.id = ${studentId}
       ORDER BY e.event_date DESC
    `;
 
@@ -85,10 +87,13 @@ export async function getStudentHistory(studentId: number): Promise<Event[]> {
 const mapToEvents = (rows: GetStudentHistoryQueryRow[]): Event[] => {
    const timezone = process.env.DB_TZ || "Asia/Makassar";
    return rows.map((row) => {
-      const { event_date, thesis, attendee_count, pass_status, ...rest } = row;
+      const { event_date, thesis, attendee_count, pass_status, request_status, ...rest } = row;
       const baseEvent = {
          ...rest,
          date: toZonedTime(fromZonedTime(event_date, timezone), timezone),
+         requestStatus: request_status,
+         passStatus: pass_status,
+         attendeeCount: attendee_count,
          thesis: {
             id: thesis.id,
             title: thesis.title,
@@ -115,3 +120,4 @@ const mapToEvents = (rows: GetStudentHistoryQueryRow[]): Event[] => {
       return baseEvent as Event;
    });
 };
+

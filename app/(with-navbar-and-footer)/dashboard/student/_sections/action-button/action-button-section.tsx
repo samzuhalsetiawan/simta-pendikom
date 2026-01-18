@@ -3,6 +3,7 @@ import { CalendarPlus, MessageSquare } from "lucide-react";
 import { ConsultationButton } from "./components/consultation-button";
 import { EventButton } from "./components/event-button";
 import { Supervisor, Examiner } from "@/types/user/lecturer";
+import { EventType } from "@/types/event/event";
 
 type ActionButtonSectionProps = {
    currentProgress: number;
@@ -15,13 +16,13 @@ export function ActionButtonSection({
 }: ActionButtonSectionProps) {
 
    // Determine which event should be scheduled next
-   const getNextEvent = (): "Seminar Proposal" | "Seminar Hasil" | "Ujian Akhir" | null => {
+   const getNextEvent = (): Exclude<EventType, "konsultasi"> | null => {
       // @ts-ignore
-      if (currentProgress === 2) return "Seminar Proposal";
+      if (currentProgress === 2) return "seminar_proposal";
       // @ts-ignore
-      if (currentProgress === 4) return "Seminar Hasil";
+      if (currentProgress === 4) return "seminar_hasil";
       // @ts-ignore
-      if (currentProgress === 5) return "Ujian Akhir";
+      if (currentProgress === 5) return "pendadaran";
       return null;
    };
 

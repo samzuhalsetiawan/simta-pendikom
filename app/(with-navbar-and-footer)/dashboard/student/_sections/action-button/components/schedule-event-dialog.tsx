@@ -6,28 +6,39 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, Loader2 } from "lucide-react";
+import { EventType } from "@/types/event/event";
+
+const eventLabels: Record<Exclude<EventType, "konsultasi">, string> = {
+   seminar_proposal: "Seminar Proposal",
+   seminar_hasil: "Seminar Hasil",
+   pendadaran: "Pendadaran",
+};
 
 interface ScheduleEventDialogProps {
    open: boolean;
    onOpenChange: (open: boolean) => void;
-   eventType: "Seminar Proposal" | "Seminar Hasil" | "Ujian Akhir";
+   eventType: Exclude<EventType, "konsultasi">;
    onSubmit?: (data: {
       datetime: string;
       location: string;
       notes?: string;
    }) => void;
+   isLoading?: boolean;
 }
 
 export function ScheduleEventDialog({
    open,
    onOpenChange,
    eventType,
-   onSubmit
+   onSubmit,
+   isLoading = false
 }: ScheduleEventDialogProps) {
    const [datetime, setDatetime] = useState("");
    const [location, setLocation] = useState("");
    const [notes, setNotes] = useState("");
+
+   const eventLabel = eventLabels[eventType];
 
    const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault();
@@ -37,11 +48,7 @@ export function ScheduleEventDialog({
             location,
             notes: notes || undefined
          });
-         // Reset form
-         setDatetime("");
-         setLocation("");
-         setNotes("");
-         onOpenChange(false);
+         // Don't reset here, wait for success
       }
    };
 
@@ -53,15 +60,15 @@ export function ScheduleEventDialog({
    };
 
    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={(open) => !isLoading && onOpenChange(open)}>
          <DialogContent className="sm:max-w-[500px]">
             <DialogHeader>
                <DialogTitle className="flex items-center gap-2">
                   <CalendarClock className="w-5 h-5 text-primary" />
-                  Jadwalkan {eventType}
+                  Jadwalkan {eventLabel}
                </DialogTitle>
                <DialogDescription>
-                  Tentukan jadwal untuk {eventType.toLowerCase()} Anda
+                  Tentukan jadwal untuk {eventLabel.toLowerCase()} Anda
                </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleSubmit}>
@@ -74,6 +81,7 @@ export function ScheduleEventDialog({
                         value={datetime}
                         onChange={(e) => setDatetime(e.target.value)}
                         required
+                        disabled={isLoading}
                      />
                   </div>
 
@@ -85,6 +93,7 @@ export function ScheduleEventDialog({
                         onChange={(e) => setLocation(e.target.value)}
                         placeholder="Ruang Seminar, Aula, dll."
                         required
+                        disabled={isLoading}
                      />
                   </div>
 
@@ -96,16 +105,18 @@ export function ScheduleEventDialog({
                         onChange={(e) => setNotes(e.target.value)}
                         placeholder="Tambahkan catatan jika diperlukan..."
                         className="min-h-[100px]"
+                        disabled={isLoading}
                      />
                   </div>
                </div>
 
                <DialogFooter>
-                  <Button type="button" variant="outline" onClick={handleCancel}>
+                  <Button type="button" variant="outline" onClick={handleCancel} disabled={isLoading}>
                      Batal
                   </Button>
-                  <Button type="submit" className="bg-purple-600 hover:bg-purple-700">
-                     Jadwalkan {eventType}
+                  <Button type="submit" className="bg-purple-600 hover:bg-purple-700" disabled={isLoading}>
+                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                     Jadwalkan {eventLabel}
                   </Button>
                </DialogFooter>
             </form>
@@ -113,3 +124,4 @@ export function ScheduleEventDialog({
       </Dialog>
    );
 }
+
