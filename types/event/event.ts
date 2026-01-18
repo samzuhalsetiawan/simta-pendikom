@@ -14,7 +14,6 @@ export type EventType = typeof eventTypes[number];
 
 type WithType<T extends EventType> = { type: T };
 
-
 export type Event =
   | Konsultasi & WithType<"konsultasi">
   | SeminarProposal & WithType<"seminar_proposal">

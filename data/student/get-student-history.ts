@@ -117,7 +117,7 @@ const mapToEvents = (rows: GetStudentHistoryQueryRow[]): Event[] => {
             })) ?? [],
          },
       };
-      return baseEvent as Event;
+      return baseEvent satisfies Event;
    });
 };
 

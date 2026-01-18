@@ -93,13 +93,13 @@ export function EventCalendarBody({
                            {day.date}
                         </span>
                         <div className="mt-1 space-y-1">
-                           {dayEvents.slice(0, 3).map(event => (
+                           {dayEvents.slice(0, 2).map(event => (
                               <div key={event.id} className={cn("text-[9px] px-1 rounded truncate", getEventStyle(event.type).split(' ')[0])}>
                                  {event.type}
                               </div>
                            ))}
-                           {dayEvents.length > 3 && (
-                              <div className="text-[9px] text-muted-foreground px-1">+{dayEvents.length - 3} more</div>
+                           {dayEvents.length > 2 && (
+                              <div className="text-[9px] text-muted-foreground px-1">+{dayEvents.length - 2} more</div>
                            )}
                         </div>
                      </div>
@@ -134,25 +134,42 @@ export function EventCalendarBody({
                               )}
                               onClick={() => { onHourInDayClick && onHourInDayClick({ date: day.fullDate, events: dayEvents }) }}
                            >
-                              {dayEvents.map((event, idx) => (
-                                 <div key={event.id}
-                                    className={cn("absolute inset-x-1 top-0 bottom-1 p-1 pl-2 rounded text-[10px] leading-tight font-medium overflow-hidden z-10 shadow-sm transition-all hover:scale-[1.02] hover:z-20", getEventStyle(event.type))}
-                                    style={{
-                                       width: dayEvents.length > 1 ? `${90 / dayEvents.length}%` : 'auto',
-                                       left: dayEvents.length > 1 ? `${(90 / dayEvents.length) * idx + 2}%` : '4px',
-                                       right: dayEvents.length > 1 ? 'auto' : '4px'
-                                    }}
-                                    onClick={(e) => {
-                                       e.stopPropagation(); // prevent triggering cell click twice logic if needed, but here filtering works same
-                                       onHourInDayClick && onHourInDayClick({ date: day.fullDate, events: [event] });
-                                    }}
-                                 >
-                                    <div className="font-bold mb-0.5 text-[9px] opacity-80">
-                                       {event.date.getHours()}:00 - {event.date.getHours() + 1}:00
+                              {/* Show max 2 events: if 3+, show 1 event + "+X more" card */}
+                              {dayEvents.length <= 2 ? (
+                                 dayEvents.map((event, idx) => (
+                                    <div key={event.id}
+                                       className={cn("absolute inset-x-1 top-0 bottom-1 p-1 pl-2 rounded text-[10px] leading-tight font-medium overflow-hidden z-10 shadow-sm transition-all hover:scale-[1.02] hover:z-20", getEventStyle(event.type))}
+                                       style={{
+                                          width: dayEvents.length > 1 ? '44%' : 'auto',
+                                          left: dayEvents.length > 1 ? `${44 * idx + 4}%` : '4px',
+                                          right: dayEvents.length > 1 ? 'auto' : '4px'
+                                       }}
+                                    >
+                                       <div className="font-bold mb-0.5 text-[9px] opacity-80">
+                                          {event.date.getHours()}:00 - {event.date.getHours() + 1}:00
+                                       </div>
+                                       <div className="truncate">{event.type}</div>
                                     </div>
-                                    <div className="truncate">{event.type}</div>
-                                 </div>
-                              ))}
+                                 ))
+                              ) : (
+                                 <>
+                                    <div
+                                       className={cn("absolute top-0 bottom-1 p-1 pl-2 rounded text-[10px] leading-tight font-medium overflow-hidden z-10 shadow-sm transition-all hover:scale-[1.02] hover:z-20", getEventStyle(dayEvents[0].type))}
+                                       style={{ width: '44%', left: '4%' }}
+                                    >
+                                       <div className="font-bold mb-0.5 text-[9px] opacity-80">
+                                          {dayEvents[0].date.getHours()}:00 - {dayEvents[0].date.getHours() + 1}:00
+                                       </div>
+                                       <div className="truncate">{dayEvents[0].type}</div>
+                                    </div>
+                                    <div
+                                       className="absolute top-0 bottom-1 p-1 rounded text-[10px] leading-tight font-medium z-10 bg-muted/60 dark:bg-muted/40 text-muted-foreground flex items-center justify-center transition-all hover:bg-muted/80"
+                                       style={{ width: '44%', left: '52%' }}
+                                    >
+                                       +{dayEvents.length - 1} more
+                                    </div>
+                                 </>
+                              )}
                            </div>
                         )
                      })}
