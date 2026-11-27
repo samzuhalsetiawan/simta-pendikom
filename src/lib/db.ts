@@ -23,6 +23,11 @@ function translateSql(sql: string): string {
     pgSql = pgSql.replace(/\b(FROM|JOIN|UPDATE|INTO)\s+user\b/gi, '$1 "user"');
     // Remove MySQL backticks
     pgSql = pgSql.replace(/`/g, '"');
+    // Quote camelCase identifiers so PostgreSQL doesn't fold them to lowercase
+    pgSql = pgSql.replace(
+        /(?<!")\b(createdAt|updatedAt|emailVerified|displayUsername|userId|expiresAt|accessToken|refreshToken|idToken|accessTokenExpiresAt|refreshTokenExpiresAt|ipAddress|userAgent|accountId|providerId)\b(?!")/g,
+        '"$1"'
+    );
     // UUID_TO_BIN($n) -> decode(replace($n, '-', ''), 'hex')
     pgSql = pgSql.replace(/UUID_TO_BIN\((\$\d+)\)/gi, "decode(replace($1, '-', ''), 'hex')");
     // BIN_TO_UUID(col) -> formatted UUID string
