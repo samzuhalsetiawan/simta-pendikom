@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { username } from "better-auth/plugins";
-import { createPool } from "mysql2/promise";
+import { Pool } from "pg";
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY || "re_dummy");
@@ -11,13 +11,10 @@ export const auth = betterAuth({
         "http://10.32.180.24:3000",
         "http://10.32.178.6:3000",
         "https://*.trycloudflare.com",
+        "https://simta-pendikom.vercel.app"
     ],
-    database: createPool({
-        host: process.env.DB_HOST,
-        port: Number(process.env.DB_PORT),
-        user: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
+    database: new Pool({
+        connectionString: process.env.DATABASE_URL,
     }),
     emailAndPassword: {
         enabled: true,

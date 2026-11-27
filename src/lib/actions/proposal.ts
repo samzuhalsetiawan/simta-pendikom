@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
-import { writeFile } from "fs/promises";
+import { put } from "@vercel/blob";
 import path from "path";
 import { logStudentActivity } from "./activity";
 
@@ -100,17 +100,12 @@ export async function uploadProposalPdf(id: string, data: FormData) {
 
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        
-        const fileName = `proposal_${id}.pdf`;
-        const uploadDir = path.join(process.cwd(), "uploaded", "document");
-        
-        // Ensure directory exists
-        await require("fs").promises.mkdir(uploadDir, { recursive: true });
-        
-        const filePath = path.join(uploadDir, fileName);
-        await writeFile(filePath, buffer);
-        
-        const fileUrl = `/api/uploaded/document/${fileName}`;
+
+        const blob = await put(`document/proposal_${id}.pdf`, buffer, {
+            access: "public",
+            allowOverwrite: true,
+        });
+        const fileUrl = blob.url;
         
         await connection.execute(
             "UPDATE thesis SET proposal_url = ? WHERE id = UUID_TO_BIN(?)",

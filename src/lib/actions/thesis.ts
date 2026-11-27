@@ -88,18 +88,17 @@ export async function uploadThesisPdf(thesisId: string, formData: FormData) {
     }
 
     try {
-        const uploadDir = path.join(process.cwd(), "uploaded", "document");
-        await fs.mkdir(uploadDir, { recursive: true });
-
-        const fileName = `skripsi_${thesisId}.pdf`;
-        const filePath = path.join(uploadDir, fileName);
-
+        const fileName = `document/skripsi_${thesisId}.pdf`;
         const arrayBuffer = await file.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
-        await fs.writeFile(filePath, buffer);
+        const { put } = await import("@vercel/blob");
+        const blob = await put(fileName, buffer, {
+            access: "public",
+            allowOverwrite: true,
+        });
 
-        const dbPath = `/api/uploaded/document/${fileName}`;
+        const dbPath = blob.url;
         await db.execute(
             'UPDATE thesis SET thesis_url = ? WHERE id = UUID_TO_BIN(?)',
             [dbPath, thesisId]

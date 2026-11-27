@@ -11,7 +11,7 @@ import path from "path";
 import { logStudentActivity } from "./activity";
 import { MIN_SEMINAR_ATTENDANCE } from "@/lib/constants/thesis";
 
-const UPLOAD_DIR = path.join(process.cwd(), "uploaded", "document");
+import { put } from "@vercel/blob";
 
 export async function requestSeminarProposal(formData: FormData) {
     try {
@@ -213,18 +213,14 @@ export async function uploadSuratPermohonanPendadaranAction(formData: FormData) 
             return { error: "Permohonan sidang skripsi tidak dalam status menunggu upload atau perbaikan surat permohonan." };
         }
 
-        if (!fs.existsSync(UPLOAD_DIR)) {
-            fs.mkdirSync(UPLOAD_DIR, { recursive: true });
-        }
-
         const timestamp = Date.now();
-        const filename = `surat_permohonan_pendadaran_${nim}_${timestamp}.pdf`;
-        const filePath = path.join(UPLOAD_DIR, filename);
-
+        const filename = `document/surat_permohonan_pendadaran_${nim}_${timestamp}.pdf`;
         const buffer = Buffer.from(await file.arrayBuffer());
-        fs.writeFileSync(filePath, buffer);
-
-        const dbUrl = `/api/uploaded/document/${filename}`;
+        const blob = await put(filename, buffer, {
+            access: "public",
+            allowOverwrite: true,
+        });
+        const dbUrl = blob.url;
 
         await db.execute(
             `UPDATE pendadaran SET surat_permohonan_pendadaran_url = ?, status = 'pending_staff_approval' WHERE id = UUID_TO_BIN(?)`,

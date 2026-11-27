@@ -1,9 +1,5 @@
-import fs from "fs/promises";
-import path from "path";
+import { put, del } from "@vercel/blob";
 import { db } from "./db";
-
-const AVATAR_DIR = path.join(process.cwd(), "uploaded", "avatar");
-const SIGNATURE_DIR = path.join(process.cwd(), "uploaded", "signature");
 
 /**
  * Saves an avatar image to the local file system.
@@ -16,31 +12,19 @@ const SIGNATURE_DIR = path.join(process.cwd(), "uploaded", "signature");
  */
 export async function saveAvatar(username: string, buffer: Buffer, extension: string): Promise<string> {
     try {
-        await fs.mkdir(AVATAR_DIR, { recursive: true });
-
         const allowedExts = ["jpg", "jpeg", "png"];
-        if (!allowedExts.includes(extension.toLowerCase())) {
+        const ext = extension.toLowerCase();
+        if (!allowedExts.includes(ext)) {
             throw new Error("Format file tidak diizinkan. Gunakan jpg, jpeg, atau png.");
         }
 
-        const fileName = `avatar_${username}.${extension.toLowerCase()}`;
-        const filePath = path.join(AVATAR_DIR, fileName);
+        const fileName = `avatar/avatar_${username}.${ext}`;
+        const blob = await put(fileName, buffer, {
+            access: "public",
+            allowOverwrite: true,
+        });
 
-        // Delete other possible extensions for this user to avoid "ghost" files
-        for (const ext of allowedExts) {
-            if (ext !== extension.toLowerCase()) {
-                const oldFile = path.join(AVATAR_DIR, `avatar_${username}.${ext}`);
-                try {
-                    await fs.unlink(oldFile);
-                } catch (e) {
-                    // Ignore if file doesn't exist
-                }
-            }
-        }
-
-        await fs.writeFile(filePath, buffer);
-
-        return `/api/avatar/${username}?t=${Date.now()}`;
+        return blob.url;
     } catch (error) {
         console.error("Error saving avatar:", error);
         throw new Error("Gagal menyimpan foto profil.");
@@ -56,17 +40,15 @@ export async function saveAvatar(username: string, buffer: Buffer, extension: st
  */
 export async function saveSignature(username: string, buffer: Buffer): Promise<string> {
     try {
-        await fs.mkdir(SIGNATURE_DIR, { recursive: true });
+        const fileName = `signature/signature_${username}.png`;
+        const blob = await put(fileName, buffer, {
+            access: "public",
+            allowOverwrite: true,
+        });
 
-        const fileName = `signature_${username}.png`;
-        const filePath = path.join(SIGNATURE_DIR, fileName);
+        await db.query('UPDATE "user" SET signature = $1 WHERE username = $2', [blob.url, username]);
 
-        await fs.writeFile(filePath, buffer);
-
-        const dbPath = `/api/uploaded/signature/${fileName}`;
-        await db.execute('UPDATE user SET signature = ? WHERE username = ?', [dbPath, username]);
-
-        return `/api/signature/${username}?t=${Date.now()}`;
+        return blob.url;
     } catch (error) {
         console.error("Error saving signature:", error);
         throw new Error("Gagal menyimpan tanda tangan.");
