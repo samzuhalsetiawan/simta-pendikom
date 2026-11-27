@@ -1,0 +1,1 @@
+export const MIN_SEMINAR_ATTENDANCE = 3;
