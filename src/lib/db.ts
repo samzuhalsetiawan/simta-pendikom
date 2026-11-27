@@ -35,6 +35,10 @@ function translateSql(sql: string): string {
         /BIN_TO_UUID\(([^)]+)\)/gi,
         "regexp_replace(encode($1, 'hex'), '(.{8})(.{4})(.{4})(.{4})(.{12})', '\\1-\\2-\\3-\\4-\\5')"
     );
+    // JSON_OBJECT(...) -> json_build_object(...)
+    pgSql = pgSql.replace(/\bJSON_OBJECT\(/gi, "json_build_object(");
+    // YEAR(expr) -> EXTRACT(YEAR FROM expr)::int
+    pgSql = pgSql.replace(/\bYEAR\(([^)]+)\)/gi, "EXTRACT(YEAR FROM $1)::int");
 
     return pgSql;
 }
