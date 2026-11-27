@@ -28,6 +28,8 @@ function translateSql(sql: string): string {
         /(?<!")\b(createdAt|updatedAt|emailVerified|displayUsername|userId|expiresAt|accessToken|refreshToken|idToken|accessTokenExpiresAt|refreshTokenExpiresAt|ipAddress|userAgent|accountId|providerId)\b(?!")/g,
         '"$1"'
     );
+    // UUID_TO_BIN(UUID()) -> random 16-byte bytea
+    pgSql = pgSql.replace(/UUID_TO_BIN\(UUID\(\)\)/gi, "decode(replace(gen_random_uuid()::text, '-', ''), 'hex')");
     // UUID_TO_BIN($n) -> decode(replace($n, '-', ''), 'hex')
     pgSql = pgSql.replace(/UUID_TO_BIN\((\$\d+)\)/gi, "decode(replace($1, '-', ''), 'hex')");
     // BIN_TO_UUID(col) -> formatted UUID string
@@ -37,8 +39,16 @@ function translateSql(sql: string): string {
     );
     // JSON_OBJECT(...) -> json_build_object(...)
     pgSql = pgSql.replace(/\bJSON_OBJECT\(/gi, "json_build_object(");
+    // JSON_ARRAYAGG(...) -> json_agg(...)
+    pgSql = pgSql.replace(/\bJSON_ARRAYAGG\(/gi, "json_agg(");
     // YEAR(expr) -> EXTRACT(YEAR FROM expr)::int
     pgSql = pgSql.replace(/\bYEAR\(([^)]+)\)/gi, "EXTRACT(YEAR FROM $1)::int");
+    // MONTH(expr) -> EXTRACT(MONTH FROM expr)::int
+    pgSql = pgSql.replace(/\bMONTH\(([^)]+)\)/gi, "EXTRACT(MONTH FROM $1)::int");
+    // CURDATE() -> CURRENT_DATE
+    pgSql = pgSql.replace(/\bCURDATE\(\)/gi, "CURRENT_DATE");
+    // DATE(expr) -> (expr)::date
+    pgSql = pgSql.replace(/\bDATE\(([^)]+)\)/gi, "($1)::date");
 
     return pgSql;
 }

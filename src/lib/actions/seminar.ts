@@ -501,7 +501,7 @@ export async function submitLecturerScore(seminarId: string, type: 'proposal' | 
         await connection.execute(
             `INSERT INTO ${scoreTable} (id, seminar_id, lecturer_nip, score) 
              VALUES (UUID_TO_BIN(UUID()), UUID_TO_BIN(?), ?, ?)
-             ON DUPLICATE KEY UPDATE score = VALUES(score), updated_at = CURRENT_TIMESTAMP`,
+             ON CONFLICT (seminar_id, lecturer_nip) DO UPDATE SET score = EXCLUDED.score, updated_at = CURRENT_TIMESTAMP`,
             [seminarId, lecturerNip, score]
         );
 

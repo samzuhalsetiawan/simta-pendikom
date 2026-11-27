@@ -24,6 +24,6 @@ export async function updateChecklistStatus(nim: string, item_id: string, is_che
     await db.execute(`
         INSERT INTO student_graduation_checklists (nim, item_id, is_checked)
         VALUES (?, ?, ?)
-        ON DUPLICATE KEY UPDATE is_checked = ?
-    `, [nim, item_id, is_checked, is_checked]);
+        ON CONFLICT (nim, item_id) DO UPDATE SET is_checked = EXCLUDED.is_checked
+    `, [nim, item_id, is_checked]);
 }

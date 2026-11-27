@@ -66,7 +66,7 @@ export async function getStaffPipelineStats(): Promise<PipelineStats> {
 export async function getStaffGraduationStats(): Promise<GraduationStat[]> {
     const [rows] = await db.execute(`
         SELECT 
-            CONCAT(YEAR(tph.changed_at), ' ', IF(MONTH(tph.changed_at) <= 6, 'Ganjil', 'Genap')) as period,
+            CONCAT(EXTRACT(YEAR FROM tph.changed_at)::int, ' ', CASE WHEN EXTRACT(MONTH FROM tph.changed_at) <= 6 THEN 'Ganjil' ELSE 'Genap' END) as period,
             COUNT(*) as count
         FROM thesis_progress_history tph
         JOIN thesis t ON tph.thesis_id = t.id
@@ -92,7 +92,7 @@ export async function getStaffInactiveStudents(): Promise<InactiveStudent[]> {
                 t.progress,
                 (SELECT description FROM student_activity_logs WHERE student_nim = s.nim ORDER BY created_at DESC LIMIT 1) as last_activity,
                 COALESCE((SELECT MAX(created_at) FROM student_activity_logs WHERE student_nim = s.nim), t.createdAt) as last_activity_date,
-                DATEDIFF(NOW(), COALESCE((SELECT MAX(created_at) FROM student_activity_logs WHERE student_nim = s.nim), t.createdAt)) as days_inactive
+                (CURRENT_DATE - COALESCE((SELECT MAX(created_at) FROM student_activity_logs WHERE student_nim = s.nim), t."createdAt")::date) as days_inactive
             FROM thesis t
             JOIN student s ON t.nim = s.nim
             JOIN user u ON s.nim = u.username
