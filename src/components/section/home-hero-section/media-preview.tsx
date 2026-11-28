@@ -47,7 +47,7 @@ export function MediaPreview() {
         </motion.div>
       </AnimatePresence>
       {/* Subtle gradient to blend with background: full overlay on mobile, left-to-right fade on desktop */}
-      <div className="absolute inset-0 bg-background/85 dark:bg-background/90 lg:bg-transparent lg:bg-gradient-to-r lg:from-background lg:via-background/80 lg:via-30% lg:to-transparent w-full pointer-events-none" />
+      <div className="absolute inset-0 bg-background/85 dark:bg-background/90 lg:bg-transparent lg:dark:bg-transparent lg:bg-gradient-to-r lg:from-background lg:via-background/80 lg:via-30% lg:to-transparent w-full pointer-events-none" />
     </motion.div>
   )
 }
