@@ -4,7 +4,7 @@ import * as React from "react"
 import { Suspense } from "react"
 import Image from "next/image"
 import { Eye, EyeOff, Lock, User, Loader2 } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation"
 
 import { Button } from "@/components/base/button"
 import { Input } from "@/components/base/input"
@@ -18,9 +18,13 @@ import { authClient } from "@/lib/auth-client"
 import { motion } from "framer-motion"
 
 function LoginPageContent() {
-   const router = useRouter()
    const searchParams = useSearchParams()
-   const callbackUrl = searchParams.get("callbackUrl") || "/"
+   // Hanya izinkan callbackUrl yang relatif (cegah open redirect)
+   const rawCallback = searchParams.get("callbackUrl") || "/"
+   const callbackUrl =
+      rawCallback.startsWith("/") && !rawCallback.startsWith("//")
+         ? rawCallback
+         : "/"
    const [showPassword, setShowPassword] = React.useState(false)
    const [isLoading, setIsLoading] = React.useState(false)
    const [error, setError] = React.useState<string | null>(null)
@@ -53,8 +57,10 @@ function LoginPageContent() {
             return
          }
 
-         router.push(callbackUrl)
-         router.refresh()
+         // Full navigation so Next.js clears any stale client Route Cache
+         // (e.g. a cached redirect on /dashboard from before login) and sends
+         // the fresh session cookie on the very next request.
+         window.location.assign(callbackUrl)
       } catch (err) {
          setError("Terjadi kesalahan yang tidak terduga. Silakan coba lagi.")
          console.error(err)

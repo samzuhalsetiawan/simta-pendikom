@@ -19,7 +19,7 @@ import { authClient } from "@/lib/auth-client"
 import { Button } from "@/components/base/button"
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu"
 import * as Avatar from "@radix-ui/react-avatar"
-import { useRouter, usePathname } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { QRScannerModal } from "@/components/shared/qr-scanner-modal"
 import { ScanLine } from "lucide-react"
@@ -47,7 +47,6 @@ export function Navbar({
 }: NavbarProps = {}) {
   const { setTheme } = useTheme()
   const { data: authSession } = authClient.useSession()
-  const router = useRouter()
   const pathname = usePathname() || ""
 
   const [avatarOverride, setAvatarOverride] = React.useState<string | null>(null)
@@ -107,8 +106,7 @@ export function Navbar({
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
-          router.push("/login")
-          router.refresh()
+          window.location.assign("/login")
         },
       },
     })
@@ -160,6 +158,7 @@ export function Navbar({
         <div className="hidden lg:flex items-center gap-5 xl:gap-6">
           <Link
             href="/dashboard"
+            prefetch={false}
             className={`relative py-2 text-sm font-semibold transition-colors hover:text-primary ${
               pathname === "/dashboard" ? "text-primary" : "text-muted-foreground"
             }`}
@@ -501,6 +500,7 @@ export function Navbar({
             <div className="container mx-auto px-4 py-4 space-y-2 max-w-7xl">
               <Link
                 href="/dashboard"
+                prefetch={false}
                 onClick={() => setMobileMenuOpen(false)}
                 className={`block rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
                   pathname === "/dashboard"

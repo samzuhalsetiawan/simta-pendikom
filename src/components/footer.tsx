@@ -64,7 +64,7 @@ export function Footer() {
           <div className="space-y-4">
             <h3 className="font-heading font-bold text-foreground">Tautan Akademik</h3>
             <ul className="space-y-2.5 text-sm">
-              <li><Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link></li>
+              <li><Link href="/dashboard" prefetch={false} className="hover:text-primary transition-colors">Dashboard</Link></li>
               <li><Link href="/skripsi" className="hover:text-primary transition-colors">Skripsi</Link></li>
               <li><Link href="/kalender" className="hover:text-primary transition-colors">Kalender</Link></li>
               <li><Link href="/mahasiswa" className="hover:text-primary transition-colors">Mahasiswa</Link></li>

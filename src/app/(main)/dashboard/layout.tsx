@@ -13,7 +13,9 @@ export default async function DashboardLayout({
     });
 
     if (!session) {
-        redirect("/login");
+        // Middleware sudah handle redirect ini, tapi ini sebagai fallback.
+        // headers() berisi request URL sehingga kita bisa buat callbackUrl.
+        redirect("/login?callbackUrl=/dashboard");
     }
 
     return (
