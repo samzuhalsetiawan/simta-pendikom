@@ -216,11 +216,11 @@ export async function uploadSuratPermohonanPendadaranAction(formData: FormData) 
         const timestamp = Date.now();
         const filename = `document/surat_permohonan_pendadaran_${nim}_${timestamp}.pdf`;
         const buffer = Buffer.from(await file.arrayBuffer());
-        const blob = await put(filename, buffer, {
-            access: "public",
+        await put(filename, buffer, {
+            access: "private",
             allowOverwrite: true,
         });
-        const dbUrl = blob.url;
+        const dbUrl = `/api/uploaded/${filename}`;
 
         await db.execute(
             `UPDATE pendadaran SET surat_permohonan_pendadaran_url = ?, status = 'pending_staff_approval' WHERE id = UUID_TO_BIN(?)`,

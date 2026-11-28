@@ -40,15 +40,15 @@ export async function generateAndSaveSuratPersetujuan(
     if (!element) throw new Error("Invalid seminar type for PDF generation");
 
     const pdfBuffer = await renderToBuffer(element);
-    const blob = await put(fileName, pdfBuffer, {
-        access: "public",
+    await put(fileName, pdfBuffer, {
+        access: "private",
         allowOverwrite: true,
     });
 
     if (!docIdToUpdate) {
         await db.query(
             `INSERT INTO document (id, type, file_path, title, uploader_nim) VALUES ($1, $2, $3, $4, $5)`,
-            [Buffer.from(docId.replace(/-/g, ''), 'hex'), docType, blob.url, title, nim]
+            [Buffer.from(docId.replace(/-/g, ''), 'hex'), docType, `/api/uploaded/${fileName}`, title, nim]
         );
     }
 

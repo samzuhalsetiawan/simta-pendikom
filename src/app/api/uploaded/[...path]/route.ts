@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { get, head } from "@vercel/blob";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { isFileAuthorized } from "@/lib/services/file-authorization";
@@ -17,6 +18,17 @@ export async function GET(
 
         if (!authorized) {
             return NextResponse.json({ error: "Forbidden: Anda tidak memiliki akses ke dokumen ini" }, { status: 403 });
+        }
+
+        const blobKey = pathArray.join("/");
+        const blobResult = await get(blobKey, { access: "private" }).catch(() => null);
+        if (blobResult && blobResult.statusCode === 200 && blobResult.stream) {
+            return new NextResponse(blobResult.stream, {
+                headers: {
+                    "Content-Type": blobResult.blob.contentType || storageProvider.getMimeType(pathArray),
+                    "Cache-Control": "private, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+                },
+            });
         }
 
         const exists = await storageProvider.exists(pathArray);
@@ -52,6 +64,18 @@ export async function HEAD(
 
         if (!authorized) {
             return new NextResponse(null, { status: 403 });
+        }
+
+        const blobKey = pathArray.join("/");
+        const blobMeta = await head(blobKey).catch(() => null);
+        if (blobMeta) {
+            return new NextResponse(null, {
+                status: 200,
+                headers: {
+                    "Content-Type": blobMeta.contentType || storageProvider.getMimeType(pathArray),
+                    "Cache-Control": "private, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+                },
+            });
         }
 
         const exists = await storageProvider.exists(pathArray);

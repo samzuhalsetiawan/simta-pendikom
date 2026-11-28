@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { get } from "@vercel/blob";
 import fs from "fs/promises";
 import path from "path";
 import { db } from "@/lib/db";
@@ -16,8 +17,23 @@ export async function GET(
             return NextResponse.json({ error: "Tanda tangan tidak ditemukan" }, { status: 404 });
         }
 
-        // DB stores relative path like /api/uploaded/signature/file.png
-        const relativePath = rows[0].signature.replace(/^\/api\//, '').replace(/^\//, '');
+        const signatureVal: string = rows[0].signature;
+        const blobKey = signatureVal.startsWith("/api/uploaded/")
+            ? signatureVal.replace(/^\/api\/uploaded\//, "")
+            : signatureVal;
+
+        const blobResult = await get(blobKey, { access: "private" }).catch(() => null);
+        if (blobResult && blobResult.statusCode === 200 && blobResult.stream) {
+            return new NextResponse(blobResult.stream, {
+                headers: {
+                    "Content-Type": blobResult.blob.contentType || "image/png",
+                    "Cache-Control": "private, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+                },
+            });
+        }
+
+        // Fallback to local file system if present
+        const relativePath = signatureVal.replace(/^\/api\//, '').replace(/^\//, '');
         const filePath = path.join(process.cwd(), relativePath);
 
         try {
@@ -31,7 +47,7 @@ export async function GET(
         return new NextResponse(fileBuffer, {
             headers: {
                 "Content-Type": "image/png",
-                "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+                "Cache-Control": "private, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
             },
         });
     } catch (error) {

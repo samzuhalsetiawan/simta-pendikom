@@ -93,12 +93,12 @@ export async function uploadThesisPdf(thesisId: string, formData: FormData) {
         const buffer = Buffer.from(arrayBuffer);
 
         const { put } = await import("@vercel/blob");
-        const blob = await put(fileName, buffer, {
-            access: "public",
+        await put(fileName, buffer, {
+            access: "private",
             allowOverwrite: true,
         });
 
-        const dbPath = blob.url;
+        const dbPath = `/api/uploaded/${fileName}`;
         await db.execute(
             'UPDATE thesis SET thesis_url = ? WHERE id = UUID_TO_BIN(?)',
             [dbPath, thesisId]

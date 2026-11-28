@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { get } from "@vercel/blob";
 import fs from "fs/promises";
 import path from "path";
 
@@ -8,10 +9,22 @@ export async function GET(
 ) {
     try {
         const { username } = await params;
-        const uploadDir = path.join(process.cwd(), "uploaded", "avatar");
-
-        // Find the file with any allowed extension
         const allowedExts = ["jpg", "jpeg", "png"];
+
+        for (const ext of allowedExts) {
+            const blobKey = `avatar/avatar_${username}.${ext}`;
+            const blobResult = await get(blobKey, { access: "private" }).catch(() => null);
+            if (blobResult && blobResult.statusCode === 200 && blobResult.stream) {
+                return new NextResponse(blobResult.stream, {
+                    headers: {
+                        "Content-Type": blobResult.blob.contentType || `image/${ext === "jpg" ? "jpeg" : ext}`,
+                        "Cache-Control": "public, max-age=3600, s-maxage=3600, stale-while-revalidate=86400",
+                    },
+                });
+            }
+        }
+
+        const uploadDir = path.join(process.cwd(), "uploaded", "avatar");
         let filePath = "";
         let contentType = "";
 
@@ -22,7 +35,7 @@ export async function GET(
                 filePath = potentialPath;
                 contentType = `image/${ext === "jpg" ? "jpeg" : ext}`;
                 break;
-            } catch (e) {
+            } catch {
                 // Continue to next extension
             }
         }

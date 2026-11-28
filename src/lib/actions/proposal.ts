@@ -101,11 +101,12 @@ export async function uploadProposalPdf(id: string, data: FormData) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const blob = await put(`document/proposal_${id}.pdf`, buffer, {
-            access: "public",
+        const fileName = `document/proposal_${id}.pdf`;
+        await put(fileName, buffer, {
+            access: "private",
             allowOverwrite: true,
         });
-        const fileUrl = blob.url;
+        const fileUrl = `/api/uploaded/${fileName}`;
         
         await connection.execute(
             "UPDATE thesis SET proposal_url = ? WHERE id = UUID_TO_BIN(?)",

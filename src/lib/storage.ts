@@ -19,12 +19,12 @@ export async function saveAvatar(username: string, buffer: Buffer, extension: st
         }
 
         const fileName = `avatar/avatar_${username}.${ext}`;
-        const blob = await put(fileName, buffer, {
-            access: "public",
+        await put(fileName, buffer, {
+            access: "private",
             allowOverwrite: true,
         });
 
-        return blob.url;
+        return `/api/avatar/${username}?t=${Date.now()}`;
     } catch (error) {
         console.error("Error saving avatar:", error);
         throw new Error("Gagal menyimpan foto profil.");
@@ -41,14 +41,15 @@ export async function saveAvatar(username: string, buffer: Buffer, extension: st
 export async function saveSignature(username: string, buffer: Buffer): Promise<string> {
     try {
         const fileName = `signature/signature_${username}.png`;
-        const blob = await put(fileName, buffer, {
-            access: "public",
+        await put(fileName, buffer, {
+            access: "private",
             allowOverwrite: true,
         });
 
-        await db.query('UPDATE "user" SET signature = $1 WHERE username = $2', [blob.url, username]);
+        const dbPath = `/api/uploaded/${fileName}`;
+        await db.query('UPDATE "user" SET signature = $1 WHERE username = $2', [dbPath, username]);
 
-        return blob.url;
+        return dbPath;
     } catch (error) {
         console.error("Error saving signature:", error);
         throw new Error("Gagal menyimpan tanda tangan.");
